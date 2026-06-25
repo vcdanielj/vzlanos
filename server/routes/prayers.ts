@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { Prayer } from "../../shared/types.ts";
 import { db } from "../db/client.ts";
 import { type PrayerRow, prayers } from "../db/schema.ts";
+import { isRescuer } from "../lib/auth.ts";
 import { moderate } from "../lib/moderation.ts";
 import { rateLimit } from "../lib/ratelimit.ts";
 
@@ -76,4 +77,14 @@ app.post("/:id/pray", async (c) => {
 	return c.json({ prayer: toPublic(row) });
 });
 
+// POST /api/prayers/:id/hide — ocultar un mensaje abusivo (moderador con token).
+app.post("/:id/hide", async (c) => {
+	if (!isRescuer(c)) return c.json({ error: "No autorizado" }, 401);
+	const id = Number(c.req.param("id"));
+	if (!Number.isInteger(id)) return c.json({ error: "id inválido" }, 400);
+	await db.update(prayers).set({ hidden: true }).where(eq(prayers.id, id));
+	return c.json({ ok: true });
+});
+
 export default app;
+
