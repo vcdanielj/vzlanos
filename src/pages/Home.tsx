@@ -18,7 +18,7 @@ const actions = [
 		icon: MapPin,
 		title: "Reportar personas atrapadas",
 		desc: "Marca en el mapa dónde hay alguien atrapado (tú u otra persona).",
-		tone: "bg-vzla-red text-white",
+		tone: "bg-vzla-yellow text-vzla-blue",
 	},
 	{
 		to: "/compartir",
@@ -39,7 +39,7 @@ const actions = [
 		icon: HeartHandshake,
 		title: "Encontré a una persona",
 		desc: "Hospitales, iglesias o albergues: registra a quien recibiste, con foto.",
-		tone: "bg-vzla-yellow text-vzla-blue",
+		tone: "bg-vzla-blue text-white",
 	},
 	{
 		to: "/ayuda",
@@ -53,7 +53,7 @@ const actions = [
 		icon: HandHeart,
 		title: "Sala de oración",
 		desc: "Comparte tu petición y ora junto a la comunidad por Venezuela.",
-		tone: "bg-vzla-blue text-white",
+		tone: "bg-vzla-red text-white",
 	},
 ];
 

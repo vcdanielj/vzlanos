@@ -13,14 +13,14 @@
 		<rect x="960" y="70" width="180" height="40" fill="#FCD116" />
 		<rect x="960" y="110" width="180" height="40" fill="#00247D" />
 		<rect x="960" y="150" width="180" height="40" fill="#CF142B" />
-		<use href="#ostar" transform="translate(1005,127) scale(4)" />
-		<use href="#ostar" transform="translate(1018,129) scale(4)" />
-		<use href="#ostar" transform="translate(1031,131) scale(4)" />
-		<use href="#ostar" transform="translate(1044,133) scale(4)" />
-		<use href="#ostar" transform="translate(1057,133) scale(4)" />
-		<use href="#ostar" transform="translate(1070,131) scale(4)" />
-		<use href="#ostar" transform="translate(1083,129) scale(4)" />
-		<use href="#ostar" transform="translate(1096,127) scale(4)" />
+		<use href="#ostar" transform="translate(1005,133) scale(4)" />
+		<use href="#ostar" transform="translate(1018,131) scale(4)" />
+		<use href="#ostar" transform="translate(1031,129) scale(4)" />
+		<use href="#ostar" transform="translate(1044,127) scale(4)" />
+		<use href="#ostar" transform="translate(1057,127) scale(4)" />
+		<use href="#ostar" transform="translate(1070,129) scale(4)" />
+		<use href="#ostar" transform="translate(1083,131) scale(4)" />
+		<use href="#ostar" transform="translate(1096,133) scale(4)" />
 	</g>
 	<!-- Texto -->
 	<text x="90" y="285" font-family="Helvetica, Arial, sans-serif" font-size="130" font-weight="700" fill="#0f172a">vzlanos</text>
