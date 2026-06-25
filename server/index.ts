@@ -4,6 +4,7 @@ import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { ensureSchema } from "./db/ensure-schema.ts";
 import geocodeRoutes from "./routes/geocode.ts";
 import pfifRoutes from "./routes/pfif.ts";
 import reportRoutes from "./routes/reports.ts";
@@ -32,6 +33,12 @@ if (existsSync(distDir)) {
 }
 
 const port = Number(process.env.PORT ?? 3000);
+
+await ensureSchema().catch((err) => {
+	console.error("Error asegurando el esquema de la DB:", err);
+	process.exit(1);
+});
+
 serve({ fetch: app.fetch, port }, (info) => {
 	console.log(`emergencia server escuchando en :${info.port}`);
 });
