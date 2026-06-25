@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
@@ -17,19 +17,15 @@ app.route("/api/reports", reportRoutes);
 app.route("/api/geocode", geocodeRoutes);
 app.route("/export", pfifRoutes);
 
-// En producción servimos el build de Vite (dist). El SPA hace fallback a index.html.
+// En producción servimos el build de Vite (dist). Primero los archivos reales
+// (index.html, /assets, og.png, manifest, sw.js, icon.svg); las rutas del SPA que
+// no son un archivo caen a index.html.
 const distDir = path.resolve(process.cwd(), "dist");
 if (existsSync(distDir)) {
-	app.use("/assets/*", serveStatic({ root: "./dist" }));
-	app.use(
-		"*",
-		serveStatic({
-			root: "./dist",
-			// Fallback SPA: cualquier ruta no-API devuelve index.html
-			rewriteRequestPath: (p) =>
-				p.startsWith("/api") || p.startsWith("/export") ? p : "/index.html",
-		}),
-	);
+	const indexHtml = readFileSync(path.join(distDir, "index.html"), "utf8");
+	app.use("*", serveStatic({ root: "./dist" }));
+	// Fallback SPA: GET que no matcheó API/export ni un archivo estático.
+	app.get("*", (c) => c.html(indexHtml));
 }
 
 const port = Number(process.env.PORT ?? 3000);
