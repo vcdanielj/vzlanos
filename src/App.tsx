@@ -110,23 +110,20 @@ export const App = () => {
 				<footer className="safe-bottom border-t py-6 text-center text-xs text-muted-foreground">
 					<div className="container space-y-2">
 						<p className="font-medium text-foreground/80">
-							Hecho con <span className="text-vzla-red">❤</span> por venezolanos, para
-							venezolanos 🇻🇪
-						</p>
-						<p>
-							Herramienta comunitaria de emergencia. Si hay vidas en riesgo, llama también a
-							los servicios de emergencia.
-						</p>
-						<p className="text-[10px] text-muted-foreground/50">
-							powered by{" "}
+							Hecho con <span className="text-vzla-red">❤️</span> por venezolanos de{" "}
 							<a
 								href="https://arizon.ai"
 								target="_blank"
 								rel="noreferrer"
-								className="underline-offset-2 hover:underline"
+								className="font-semibold text-vzla-blue underline-offset-2 hover:underline"
 							>
 								arizon.ai
 							</a>
+							, para venezolanos 🇻🇪🤝🙏
+						</p>
+						<p>
+							Herramienta comunitaria de emergencia. Si hay vidas en riesgo, llama también a
+							los servicios de emergencia.
 						</p>
 					</div>
 				</footer>

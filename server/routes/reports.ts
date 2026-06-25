@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, ilike } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import type { Report } from "../../shared/types.ts";
 import { db } from "../db/client.ts";
@@ -109,8 +109,21 @@ app.post("/", async (c) => {
 		})
 		.returning();
 
-	// Si alguien se auto-reporta a salvo, avisa a quienes lo buscaban.
+	// Si alguien se auto-reporta a salvo, CRUZA con los reportes abiertos del mismo
+	// nombre y márcalos a salvo (así la búsqueda de la familia se actualiza sola),
+	// y avisa por Web Push a quienes lo buscaban.
 	if (data.selfSafe && data.type === "busqueda_persona" && inserted.personName) {
+		const norm = inserted.personName.trim().toLowerCase();
+		await db
+			.update(reports)
+			.set({ status: "a_salvo", updatedAt: new Date() })
+			.where(
+				and(
+					eq(reports.type, "busqueda_persona"),
+					inArray(reports.status, ["nuevo", "en_progreso"]),
+					sql`lower(trim(${reports.personName})) = ${norm}`,
+				),
+			);
 		void notifyPersonSafe(inserted.personName, "a_salvo");
 	}
 
