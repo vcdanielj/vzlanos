@@ -11,6 +11,7 @@ import { ShareButtons } from "./components/ShareButtons";
 import { flushQueue, pendingCount } from "./lib/api";
 import { Ayuda } from "./pages/Ayuda";
 import { Buscar } from "./pages/Buscar";
+import { CentrosAcopio } from "./pages/CentrosAcopio";
 import { Compartir } from "./pages/Compartir";
 import { EncontrarPersona } from "./pages/EncontrarPersona";
 import { Home } from "./pages/Home";
@@ -108,6 +109,7 @@ export const App = () => {
 						<Route path="/buscar" element={<Buscar />} />
 						<Route path="/encontrar" element={<EncontrarPersona />} />
 						<Route path="/oracion" element={<Oracion />} />
+						<Route path="/acopio" element={<CentrosAcopio />} />
 						<Route path="/ayuda" element={<Ayuda />} />
 						<Route path="/mapa" element={<Mapa />} />
 					</Routes>
@@ -135,6 +137,9 @@ export const App = () => {
 							</Link>
 							<Link to="/oracion" className="hover:text-foreground">
 								Oración
+							</Link>
+							<Link to="/acopio" className="hover:text-foreground">
+								Acopio
 							</Link>
 							<Link to="/ayuda" className="hover:text-foreground">
 								Ayuda

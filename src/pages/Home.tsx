@@ -3,6 +3,7 @@ import {
 	HeartHandshake,
 	LifeBuoy,
 	MapPin,
+	Package,
 	PhoneCall,
 	Search,
 	Share2,
@@ -39,6 +40,13 @@ const actions = [
 		icon: HeartHandshake,
 		title: "Encontré a una persona",
 		desc: "Hospitales, iglesias o albergues: registra a quien recibiste, con foto.",
+		tone: "bg-vzla-blue text-white",
+	},
+	{
+		to: "/acopio",
+		icon: Package,
+		title: "Centros de acopio",
+		desc: "Dónde llevar donaciones (agua, comida, medicinas) por región.",
 		tone: "bg-vzla-blue text-white",
 	},
 	{
