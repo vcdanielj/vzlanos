@@ -37,6 +37,8 @@ const createSchema = async () => {
 		// Migración idempotente: agrega columnas nuevas a tablas ya existentes en prod.
 		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS floor text`;
 		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS injured boolean`;
+		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS photo text`;
+		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS photo_mime text`;
 	} finally {
 		await sql.end();
 	}

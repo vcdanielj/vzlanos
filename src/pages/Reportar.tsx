@@ -1,5 +1,5 @@
 import { CheckCircle2, Crosshair, Loader2, MapPin, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { PickMap } from "@/components/MapView";
 import { Button } from "@/components/ui/button";
@@ -36,6 +36,12 @@ export const Reportar = () => {
 			{ enableHighAccuracy: true, timeout: 15000 },
 		);
 	};
+
+	// Pide la ubicación apenas entra (la mayoría reporta dónde está parado).
+	useEffect(() => {
+		useMyLocation();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	const applyLocInput = () => {
 		const parsed = parseLocationInput(locInput, coords ?? undefined);

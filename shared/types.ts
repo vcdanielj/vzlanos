@@ -27,6 +27,7 @@ export interface Report {
 	claimedBy: string | null;
 	// Reunificación (busqueda_persona)
 	personName: string | null;
+	hasPhoto: boolean;
 	lastKnownAddress: string | null;
 	relation: string | null;
 	reporterName: string | null;
@@ -47,6 +48,8 @@ export interface CreateReportInput {
 	injured?: boolean | null;
 	description?: string | null;
 	personName?: string | null;
+	photo?: string | null; // base64 sin prefijo
+	photoMime?: string | null;
 	lastKnownAddress?: string | null;
 	relation?: string | null;
 	reporterName?: string | null;

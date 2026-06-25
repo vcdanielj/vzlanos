@@ -29,6 +29,9 @@ export const reports = pgTable(
 		claimedBy: text("claimed_by"),
 		// Reunificación
 		personName: text("person_name"),
+		// Foto del desaparecido: base64 (sin prefijo) + mime. Se sirve por /photo, no en listas.
+		photo: text("photo"),
+		photoMime: text("photo_mime"),
 		lastKnownAddress: text("last_known_address"),
 		relation: text("relation"),
 		reporterName: text("reporter_name"),

@@ -29,6 +29,7 @@ const toPublic = (row: ReportRow, includeContact: boolean): Report => ({
 	verified: row.verified,
 	claimedBy: row.claimedBy,
 	personName: row.personName,
+	hasPhoto: !!(row.photo && row.photo.length > 0),
 	lastKnownAddress: row.lastKnownAddress,
 	relation: row.relation,
 	reporterName: row.reporterName,
@@ -95,6 +96,8 @@ app.post("/", async (c) => {
 			injured: data.injured ?? null,
 			description: data.description ?? null,
 			personName: data.personName ?? null,
+			photo: data.photo ?? null,
+			photoMime: data.photoMime ?? null,
 			lastKnownAddress: data.lastKnownAddress ?? null,
 			relation: data.relation ?? null,
 			reporterName: data.reporterName ?? null,
@@ -141,6 +144,19 @@ app.get("/search", async (c) => {
 		.orderBy(desc(reports.updatedAt))
 		.limit(100);
 	return c.json({ reports: rows.map((r) => toPublic(r, false)) });
+});
+
+// GET /api/reports/:id/photo — sirve la foto del desaparecido (base64 → bytes)
+app.get("/:id/photo", async (c) => {
+	const id = Number(c.req.param("id"));
+	if (!Number.isInteger(id)) return c.json({ error: "id inválido" }, 400);
+	const [row] = await db.select().from(reports).where(eq(reports.id, id)).limit(1);
+	if (!row?.photo) return c.json({ error: "Sin foto" }, 404);
+	const bytes = Buffer.from(row.photo, "base64");
+	return c.body(bytes, 200, {
+		"Content-Type": row.photoMime ?? "image/jpeg",
+		"Cache-Control": "public, max-age=3600",
+	});
 });
 
 // PATCH /api/reports/:id — mutar estado (rescatista)

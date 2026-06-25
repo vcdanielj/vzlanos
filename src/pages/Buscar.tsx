@@ -1,5 +1,6 @@
-import { CheckCircle2, Loader2, MapPin, Search, UserPlus } from "lucide-react";
+import { Camera, CheckCircle2, Loader2, MapPin, Search, UserPlus } from "lucide-react";
 import { useState } from "react";
+import { PickMap } from "@/components/MapView";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { createReport, geocode, searchByName } from "@/lib/api";
+import { fileToResizedBase64 } from "@/lib/image";
 import type { Report, ReportStatus } from "@shared/types";
 import { STATUS_LABELS } from "@shared/types";
 
@@ -28,11 +30,26 @@ const ReportarDesaparecido = () => {
 	const [contact, setContact] = useState("");
 	const [country, setCountry] = useState("");
 	const [description, setDescription] = useState("");
+	const [photo, setPhoto] = useState<{ base64: string; mime: string } | null>(null);
+	const [photoPreview, setPhotoPreview] = useState("");
+	const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
 	const [submitting, setSubmitting] = useState(false);
 	const [done, setDone] = useState(false);
 	// null = sin dirección; true = ubicada en mapa; false = no se pudo ubicar.
 	const [located, setLocated] = useState<boolean | null>(null);
 	const [error, setError] = useState("");
+
+	const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		try {
+			const r = await fileToResizedBase64(file);
+			setPhoto(r);
+			setPhotoPreview(`data:${r.mime};base64,${r.base64}`);
+		} catch {
+			setError("No se pudo procesar la foto.");
+		}
+	};
 
 	const submit = async () => {
 		if (!name.trim()) {
@@ -42,9 +59,9 @@ const ReportarDesaparecido = () => {
 		setError("");
 		setSubmitting(true);
 		try {
-			// Geocodifica la dirección (best-effort) para ubicarla en el mapa.
-			let coords: { lat: number; lng: number } | null = null;
-			if (address.trim()) {
+			// Prioridad: pin manual en el mapa. Si no, geocodifica la dirección.
+			let coords: { lat: number; lng: number } | null = pin;
+			if (!coords && address.trim()) {
 				try {
 					const g = await geocode(address.trim());
 					coords = { lat: g.lat, lng: g.lng };
@@ -57,6 +74,8 @@ const ReportarDesaparecido = () => {
 			await createReport({
 				type: "busqueda_persona",
 				personName: name.trim(),
+				photo: photo?.base64 ?? null,
+				photoMime: photo?.mime ?? null,
 				lastKnownAddress: address.trim() || null,
 				relation: relation.trim() || null,
 				reporterName: reporterName.trim() || null,
@@ -97,6 +116,34 @@ const ReportarDesaparecido = () => {
 				<Label htmlFor="name">Nombre completo de la persona *</Label>
 				<Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
 			</div>
+
+			<div className="space-y-2">
+				<Label>Foto (ayuda a identificarla)</Label>
+				<div className="flex items-center gap-3">
+					{photoPreview ? (
+						<img
+							src={photoPreview}
+							alt="Foto"
+							className="h-20 w-20 rounded-lg border object-cover"
+						/>
+					) : (
+						<div className="flex h-20 w-20 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+							<Camera className="h-6 w-6" />
+						</div>
+					)}
+					<label className="cursor-pointer rounded-md border px-3 py-2 text-sm hover:bg-accent">
+						{photoPreview ? "Cambiar foto" : "Subir foto"}
+						<input
+							type="file"
+							accept="image/*"
+							capture="environment"
+							className="hidden"
+							onChange={onPhoto}
+						/>
+					</label>
+				</div>
+			</div>
+
 			<div className="space-y-2">
 				<Label htmlFor="addr">Última dirección conocida</Label>
 				<Input
@@ -106,8 +153,13 @@ const ReportarDesaparecido = () => {
 					onChange={(e) => setAddress(e.target.value)}
 				/>
 				<p className="text-xs text-muted-foreground">
-					La ubicamos en el mapa para los rescatistas.
+					La ubicamos en el mapa, o marca el punto exacto abajo.
 				</p>
+			</div>
+
+			<div className="space-y-1">
+				<Label>Marcar última ubicación en el mapa (opcional)</Label>
+				<PickMap value={pin} onChange={setPin} className="h-[32vh] min-h-[200px] md:h-[260px]" />
 			</div>
 			<div className="grid grid-cols-2 gap-3">
 				<div className="space-y-2">
@@ -203,8 +255,16 @@ const SeguirEstado = () => {
 			<div className="space-y-2">
 				{results?.map((r) => (
 					<Card key={r.id}>
-						<CardContent className="flex items-start justify-between gap-3 p-4">
-							<div>
+						<CardContent className="flex items-start gap-3 p-4">
+							{r.hasPhoto && (
+								<img
+									src={`/api/reports/${r.id}/photo`}
+									alt={r.personName ?? "Persona"}
+									className="h-16 w-16 shrink-0 rounded-lg border object-cover"
+									loading="lazy"
+								/>
+							)}
+							<div className="flex-1">
 								<div className="font-semibold">{r.personName}</div>
 								{r.lastKnownAddress && (
 									<div className="flex items-center gap-1 text-xs text-muted-foreground">

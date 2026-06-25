@@ -19,6 +19,9 @@ export const createReportSchema = z
 		// Auto-reporte "estoy a salvo": único status que el público puede fijar al crear.
 		selfSafe: z.boolean().optional(),
 		personName: trimmedString(200),
+		// Foto base64 (sin prefijo), ~máx 6MB de string ≈ 4.5MB de imagen.
+		photo: z.string().max(6_000_000).optional().nullable(),
+		photoMime: z.string().max(50).optional().nullable(),
 		lastKnownAddress: trimmedString(500),
 		relation: trimmedString(100),
 		reporterName: trimmedString(200),
