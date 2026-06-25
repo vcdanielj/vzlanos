@@ -11,6 +11,11 @@ export default {
 		},
 		extend: {
 			colors: {
+				vzla: {
+					yellow: "#FCD116",
+					blue: "#00247D",
+					red: "#CF142B",
+				},
 				border: "hsl(var(--border))",
 				input: "hsl(var(--input))",
 				ring: "hsl(var(--ring))",

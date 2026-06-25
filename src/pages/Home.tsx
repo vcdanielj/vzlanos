@@ -1,5 +1,6 @@
 import { LifeBuoy, MapPin, PhoneCall, Search, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { VersesBanner } from "@/components/VersesBanner";
 import { Card, CardContent } from "@/components/ui/card";
 
 const actions = [
@@ -8,21 +9,21 @@ const actions = [
 		icon: MapPin,
 		title: "Reportar personas atrapadas",
 		desc: "Marca en el mapa dónde hay alguien atrapado (tú u otra persona).",
-		tone: "bg-destructive text-destructive-foreground",
+		tone: "bg-vzla-red text-white",
 	},
 	{
 		to: "/compartir",
 		icon: Share2,
 		title: "Compartir mi ubicación",
 		desc: "Envía dónde estás a tu familia por WhatsApp para que pidan ayuda.",
-		tone: "bg-amber-500 text-white",
+		tone: "bg-vzla-yellow text-vzla-blue",
 	},
 	{
 		to: "/buscar",
 		icon: Search,
 		title: "Buscar a un familiar",
 		desc: "Reporta o sigue a un ser querido desaparecido.",
-		tone: "bg-sky-600 text-white",
+		tone: "bg-vzla-blue text-white",
 	},
 	{
 		to: "/ayuda",
@@ -34,13 +35,14 @@ const actions = [
 ];
 
 export const Home = () => (
-	<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 py-4">
+	<div className="mx-auto w-full max-w-2xl space-y-5 py-2">
+		<VersesBanner />
 		<div className="space-y-2 text-center">
 			<div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
-				<LifeBuoy className="h-3.5 w-3.5" /> Respuesta a la emergencia
+				<LifeBuoy className="h-3.5 w-3.5" /> Respuesta a la emergencia 🇻🇪
 			</div>
 			<h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-				Ayuda a localizar personas atrapadas
+				Ayuda a localizar personas atrapadas o desaparecidas
 			</h1>
 			<p className="text-muted-foreground">
 				Reporta, comparte tu ubicación o busca a un ser querido. Tu reporte aparece en el mapa

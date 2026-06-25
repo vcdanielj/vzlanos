@@ -39,8 +39,19 @@ export const App = () => {
 		<Router>
 			<div className="flex min-h-screen flex-col bg-background">
 				<header className="safe-top sticky top-0 z-20 border-b bg-background/90 backdrop-blur">
+					{/* Tricolor de la bandera de Venezuela */}
+					<div className="flex h-1 w-full">
+						<div className="flex-1 bg-vzla-yellow" />
+						<div className="flex-1 bg-vzla-blue" />
+						<div className="flex-1 bg-vzla-red" />
+					</div>
 					<div className="container flex h-14 items-center justify-between gap-2">
-						<Link to="/" className="flex shrink-0 items-baseline gap-1.5">
+						<Link to="/" className="flex shrink-0 items-center gap-2">
+							<img
+								src="/flag.svg"
+								alt="Venezuela"
+								className="h-5 w-[30px] rounded-sm shadow-sm ring-1 ring-black/10"
+							/>
 							<span className="text-lg font-bold tracking-tight">vzlanos</span>
 						</Link>
 						<div className="flex items-center gap-2 md:gap-4">
@@ -98,6 +109,10 @@ export const App = () => {
 				</main>
 				<footer className="safe-bottom border-t py-6 text-center text-xs text-muted-foreground">
 					<div className="container space-y-2">
+						<p className="font-medium text-foreground/80">
+							Hecho con <span className="text-vzla-red">❤</span> por venezolanos, para
+							venezolanos 🇻🇪
+						</p>
 						<p>
 							Herramienta comunitaria de emergencia. Si hay vidas en riesgo, llama también a
 							los servicios de emergencia.
