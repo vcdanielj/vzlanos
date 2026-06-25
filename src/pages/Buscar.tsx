@@ -17,7 +17,7 @@ import { STATUS_LABELS } from "@shared/types";
 const statusVariant = (
 	s: ReportStatus,
 ): "default" | "success" | "warning" | "destructive" | "secondary" => {
-	if (s === "a_salvo" || s === "rescatado") return "success";
+	if (s === "a_salvo" || s === "rescatado" || s === "encontrado") return "success";
 	if (s === "en_progreso") return "warning";
 	if (s === "descartado") return "secondary";
 	return "destructive";
@@ -268,6 +268,11 @@ const SeguirEstado = () => {
 							)}
 							<div className="flex-1">
 								<div className="font-semibold">{r.personName}</div>
+								{r.foundAt && (
+									<div className="text-xs font-medium text-teal-700">
+										✓ Encontrada en {r.foundAt}
+									</div>
+								)}
 								{r.lastKnownAddress && (
 									<div className="flex items-center gap-1 text-xs text-muted-foreground">
 										<MapPin className="h-3 w-3" /> {r.lastKnownAddress}

@@ -4,10 +4,18 @@ import { Card, CardContent } from "@/components/ui/card";
 
 // Contactos de emergencia. VERIFICAR y ajustar al país afectado antes de difundir.
 const contacts = [
-	{ name: "Emergencias (línea única)", phone: "911", note: "Policía / bomberos / ambulancia" },
-	{ name: "Protección Civil", phone: "0212-6620644", note: "Gestión de desastres" },
-	{ name: "Bomberos", phone: "171", note: "Rescate y atención de incendios" },
-	{ name: "Cruz Roja", phone: "0212-5714380", note: "Atención humanitaria y reunificación" },
+	{ name: "Emergencias (VEN 911)", phone: "911", note: "Policía / bomberos / ambulancia · nacional" },
+	{
+		name: "Protección Civil",
+		phone: "0800-7248451",
+		note: "Gestión de desastres · gratuito nacional (también 166)",
+	},
+	{ name: "Bomberos", phone: "167", note: "Rescate y atención de incendios" },
+	{
+		name: "Cruz Roja Venezolana",
+		phone: "0212-5714380",
+		note: "Atención humanitaria · WhatsApp 0424-2190429",
+	},
 ];
 
 export const Ayuda = () => (

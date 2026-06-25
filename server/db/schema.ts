@@ -22,6 +22,8 @@ export const reports = pgTable(
 		peopleCount: integer("people_count"),
 		floor: text("floor"),
 		injured: boolean("injured"),
+		// Dónde se encontró a la persona (hospital / iglesia / albergue / calle).
+		foundAt: text("found_at"),
 		description: text("description"),
 		// nuevo | en_progreso | rescatado | a_salvo | descartado
 		status: text("status").notNull().default("nuevo"),

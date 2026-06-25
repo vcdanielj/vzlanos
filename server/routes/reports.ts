@@ -25,6 +25,7 @@ const toPublic = (row: ReportRow, includeContact: boolean): Report => ({
 	peopleCount: row.peopleCount,
 	floor: row.floor,
 	injured: row.injured,
+	foundAt: row.foundAt,
 	description: row.description,
 	status: row.status as Report["status"],
 	verified: row.verified,
@@ -56,11 +57,6 @@ app.post("/", async (c) => {
 		return c.json({ error: "Datos inválidos", details: parsed.error.flatten() }, 400);
 	}
 	const data = parsed.data;
-
-	// Honeypot: si el campo oculto viene lleno, es un bot. Respondemos OK sin insertar.
-	if (data.website && data.website.trim().length > 0) {
-		return c.json({ report: null, ok: true }, 201);
-	}
 
 	// Dedupe: para SOS/tercero, si ya hay un reporte abierto a <40m en la última
 	// hora, devolvemos ese en vez de crear un pin duplicado (anti-spam).
@@ -95,6 +91,7 @@ app.post("/", async (c) => {
 			peopleCount: data.peopleCount ?? null,
 			floor: data.floor ?? null,
 			injured: data.injured ?? null,
+			foundAt: data.foundAt ?? null,
 			description: data.description ?? null,
 			personName: data.personName ?? null,
 			photo: data.photo ?? null,
@@ -109,14 +106,17 @@ app.post("/", async (c) => {
 		})
 		.returning();
 
-	// Si alguien se auto-reporta a salvo, CRUZA con los reportes abiertos del mismo
-	// nombre y márcalos a salvo (así la búsqueda de la familia se actualiza sola),
-	// y avisa por Web Push a quienes lo buscaban.
-	if (data.selfSafe && data.type === "busqueda_persona" && inserted.personName) {
+	// Cruce de localización: cuando alguien se auto-reporta a salvo, o se reporta a una
+	// persona ENCONTRADA (hospital/iglesia/albergue), marca los reportes abiertos del
+	// mismo nombre y avisa por Web Push a quienes la buscaban.
+	const isSelfSafe = data.selfSafe && data.type === "busqueda_persona";
+	const isFound = data.type === "encontrado";
+	if ((isSelfSafe || isFound) && inserted.personName) {
 		const norm = inserted.personName.trim().toLowerCase();
-		await db
-			.update(reports)
-			.set({ status: "a_salvo", updatedAt: new Date() })
+		const newStatus = isFound ? "encontrado" : "a_salvo";
+		const matches = await db
+			.select({ id: reports.id })
+			.from(reports)
 			.where(
 				and(
 					eq(reports.type, "busqueda_persona"),
@@ -124,7 +124,19 @@ app.post("/", async (c) => {
 					sql`lower(trim(${reports.personName})) = ${norm}`,
 				),
 			);
-		void notifyPersonSafe(inserted.personName, "a_salvo");
+		// Tope anti-homónimo: si hay demasiados, es ambiguo → no propagar automáticamente.
+		if (matches.length > 0 && matches.length <= 5) {
+			await db
+				.update(reports)
+				.set({ status: newStatus, updatedAt: new Date() })
+				.where(
+					inArray(
+						reports.id,
+						matches.map((m) => m.id),
+					),
+				);
+			void notifyPersonSafe(inserted.personName, newStatus);
+		}
 	}
 
 	return c.json({ report: toPublic(inserted, false) }, 201);
@@ -152,6 +164,13 @@ app.get("/", async (c) => {
 
 // GET /api/reports/search?name= — seguimiento por nombre (familiares)
 app.get("/search", async (c) => {
+	const ip =
+		c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
+		c.req.header("x-real-ip") ??
+		"unknown";
+	if (!rateLimit(`search:${ip}`, 40, 60_000)) {
+		return c.json({ error: "Demasiadas búsquedas. Espera un momento." }, 429);
+	}
 	const parsed = searchSchema.safeParse({ name: c.req.query("name") });
 	if (!parsed.success) {
 		return c.json({ error: "Falta el nombre a buscar" }, 400);
@@ -172,8 +191,13 @@ app.get("/:id/photo", async (c) => {
 	const [row] = await db.select().from(reports).where(eq(reports.id, id)).limit(1);
 	if (!row?.photo) return c.json({ error: "Sin foto" }, 404);
 	const bytes = Buffer.from(row.photo, "base64");
+	// Allowlist de MIME: nunca servir HTML/SVG desde nuestro origen (anti-XSS almacenado).
+	const safeMime =
+		row.photoMime && /^image\/(jpeg|png|webp)$/.test(row.photoMime)
+			? row.photoMime
+			: "image/jpeg";
 	return c.body(bytes, 200, {
-		"Content-Type": row.photoMime ?? "image/jpeg",
+		"Content-Type": safeMime,
 		"Cache-Control": "public, max-age=3600",
 	});
 });

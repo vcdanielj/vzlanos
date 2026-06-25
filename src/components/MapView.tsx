@@ -13,6 +13,7 @@ const STATUS_COLOR: Record<ReportStatus, string> = {
 	en_progreso: "#f59e0b",
 	rescatado: "#059669",
 	a_salvo: "#0ea5e9",
+	encontrado: "#0d9488",
 	descartado: "#9ca3af",
 };
 
@@ -46,6 +47,18 @@ const InvalidateOnResize = () => {
 			window.removeEventListener("orientationchange", fix);
 		};
 	}, [map]);
+	return null;
+};
+
+// Recentra el mapa cuando el objetivo está lejos de la vista actual (ej. al llegar
+// el GPS async tras el montaje). No reacciona a arrastres pequeños (<200 m).
+const RecenterOnChange = ({ center }: { center: [number, number] }) => {
+	const map = useMap();
+	useEffect(() => {
+		if (map.distance(map.getCenter(), L.latLng(center)) > 200) {
+			map.setView(center, Math.max(map.getZoom(), 16));
+		}
+	}, [center, map]);
 	return null;
 };
 
@@ -137,6 +150,7 @@ export const PickMap = ({
 		<div className={`overflow-hidden rounded-xl border ${className}`}>
 			<MapContainer center={center} zoom={value ? 16 : 12} scrollWheelZoom>
 				<InvalidateOnResize />
+				{value ? <RecenterOnChange center={[value.lat, value.lng]} /> : null}
 				<TileLayer
 					attribution="&copy; OpenStreetMap"
 					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

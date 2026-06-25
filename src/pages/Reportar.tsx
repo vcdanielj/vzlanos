@@ -20,7 +20,6 @@ export const Reportar = () => {
 	const [injured, setInjured] = useState(false);
 	const [description, setDescription] = useState("");
 	const [contact, setContact] = useState("");
-	const [website, setWebsite] = useState(""); // honeypot
 	const [submitting, setSubmitting] = useState(false);
 	const [done, setDone] = useState<null | { duplicate?: boolean; queued?: boolean }>(null);
 	const [error, setError] = useState("");
@@ -77,7 +76,6 @@ export const Reportar = () => {
 				injured,
 				description: description.trim() || null,
 				reporterContact: contact.trim() || null,
-				...(website ? { website } : {}),
 			});
 			setDone({ duplicate: res.duplicate, queued: res.queued });
 		} catch (e) {
@@ -235,17 +233,6 @@ export const Reportar = () => {
 							onChange={(e) => setContact(e.target.value)}
 						/>
 					</div>
-
-					{/* Honeypot anti-bot: oculto a humanos. */}
-					<input
-						type="text"
-						tabIndex={-1}
-						autoComplete="off"
-						value={website}
-						onChange={(e) => setWebsite(e.target.value)}
-						className="hidden"
-						aria-hidden="true"
-					/>
 
 					{error && <p className="text-sm text-destructive">{error}</p>}
 

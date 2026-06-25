@@ -46,7 +46,12 @@ export const notifyPersonSafe = async (personName: string | null, status: string
 		.from(pushSubs)
 		.where(eq(pushSubs.personName, norm(personName)));
 	if (!subs.length) return;
-	const verb = status === "a_salvo" ? "reportada A SALVO" : "rescatada";
+	const verb =
+		status === "a_salvo"
+			? "reportada A SALVO"
+			: status === "encontrado"
+				? "ENCONTRADA"
+				: "rescatada";
 	const payload = JSON.stringify({
 		title: "vzlanos — buenas noticias 🇻🇪",
 		body: `“${personName}” fue ${verb}. Toca para ver el estado.`,

@@ -1,6 +1,11 @@
 // Tipos compartidos entre cliente y servidor (sin runtime).
 
-export const REPORT_TYPES = ["sos", "tercero", "busqueda_persona"] as const;
+export const REPORT_TYPES = [
+	"sos",
+	"tercero",
+	"busqueda_persona",
+	"encontrado",
+] as const;
 export type ReportType = (typeof REPORT_TYPES)[number];
 
 export const REPORT_STATUSES = [
@@ -8,6 +13,7 @@ export const REPORT_STATUSES = [
 	"en_progreso",
 	"rescatado",
 	"a_salvo",
+	"encontrado",
 	"descartado",
 ] as const;
 export type ReportStatus = (typeof REPORT_STATUSES)[number];
@@ -21,6 +27,7 @@ export interface Report {
 	peopleCount: number | null;
 	floor: string | null;
 	injured: boolean | null;
+	foundAt: string | null;
 	description: string | null;
 	status: ReportStatus;
 	verified: boolean;
@@ -46,6 +53,7 @@ export interface CreateReportInput {
 	peopleCount?: number | null;
 	floor?: string | null;
 	injured?: boolean | null;
+	foundAt?: string | null;
 	description?: string | null;
 	personName?: string | null;
 	photo?: string | null; // base64 sin prefijo
@@ -55,7 +63,6 @@ export interface CreateReportInput {
 	reporterName?: string | null;
 	reporterContact?: string | null;
 	reporterCountry?: string | null;
-	website?: string; // honeypot anti-bot (siempre vacío en humanos)
 	selfSafe?: boolean; // auto-reporte "estoy a salvo" (fija status a_salvo)
 }
 
@@ -70,6 +77,7 @@ export const STATUS_LABELS: Record<ReportStatus, string> = {
 	en_progreso: "En progreso",
 	rescatado: "Rescatado",
 	a_salvo: "A salvo",
+	encontrado: "Encontrada",
 	descartado: "Descartado",
 };
 
@@ -77,4 +85,5 @@ export const TYPE_LABELS: Record<ReportType, string> = {
 	sos: "SOS — atrapado",
 	tercero: "Reporte de terceros",
 	busqueda_persona: "Búsqueda de persona",
+	encontrado: "Persona encontrada",
 };

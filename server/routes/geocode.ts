@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { rateLimit } from "../lib/ratelimit.ts";
 import { geocodeSchema } from "../lib/validation.ts";
 
 const app = new Hono();
@@ -6,6 +7,13 @@ const app = new Hono();
 // POST /api/geocode — dirección → lat/lng vía Nominatim (OSM).
 // Para familiares en el exterior que no tienen GPS de la ubicación.
 app.post("/", async (c) => {
+	const ip =
+		c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
+		c.req.header("x-real-ip") ??
+		"unknown";
+	if (!rateLimit(`geo:${ip}`, 15, 60_000)) {
+		return c.json({ error: "Demasiadas solicitudes. Espera un momento." }, 429);
+	}
 	const body = await c.req.json().catch(() => null);
 	const parsed = geocodeSchema.safeParse(body);
 	if (!parsed.success) {

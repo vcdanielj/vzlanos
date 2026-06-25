@@ -13,9 +13,8 @@ export const createReportSchema = z
 		peopleCount: z.number().int().min(0).max(10000).optional().nullable(),
 		floor: trimmedString(50),
 		injured: z.boolean().optional().nullable(),
+		foundAt: trimmedString(50),
 		description: trimmedString(2000),
-		// Honeypot anti-bot: campo oculto que un humano nunca llena.
-		website: z.string().max(200).optional(),
 		// Auto-reporte "estoy a salvo": único status que el público puede fijar al crear.
 		selfSafe: z.boolean().optional(),
 		personName: trimmedString(200),

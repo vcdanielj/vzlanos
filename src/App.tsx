@@ -7,10 +7,12 @@ import {
 	BrowserRouter as Router,
 	Routes,
 } from "react-router-dom";
+import { ShareButtons } from "./components/ShareButtons";
 import { flushQueue, pendingCount } from "./lib/api";
 import { Ayuda } from "./pages/Ayuda";
 import { Buscar } from "./pages/Buscar";
 import { Compartir } from "./pages/Compartir";
+import { EncontrarPersona } from "./pages/EncontrarPersona";
 import { Home } from "./pages/Home";
 import { Mapa } from "./pages/Mapa";
 import { Reportar } from "./pages/Reportar";
@@ -103,12 +105,14 @@ export const App = () => {
 						<Route path="/reportar" element={<Reportar />} />
 						<Route path="/compartir" element={<Compartir />} />
 						<Route path="/buscar" element={<Buscar />} />
+						<Route path="/encontrar" element={<EncontrarPersona />} />
 						<Route path="/ayuda" element={<Ayuda />} />
 						<Route path="/mapa" element={<Mapa />} />
 					</Routes>
 				</main>
-				<footer className="safe-bottom border-t py-6 text-center text-xs text-muted-foreground">
-					<div className="container space-y-2">
+				<footer className="safe-bottom mt-4 border-t bg-muted/30 py-6 text-center text-xs text-muted-foreground">
+					<div className="container space-y-4">
+						<ShareButtons />
 						<p className="font-medium text-foreground/80">
 							Hecho con <span className="text-vzla-red">❤️</span> por venezolanos de{" "}
 							<a
@@ -120,10 +124,6 @@ export const App = () => {
 								arizon.ai
 							</a>
 							, para venezolanos 🇻🇪🤝🙏
-						</p>
-						<p>
-							Herramienta comunitaria de emergencia. Si hay vidas en riesgo, llama también a
-							los servicios de emergencia.
 						</p>
 					</div>
 				</footer>

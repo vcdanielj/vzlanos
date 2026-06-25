@@ -11,7 +11,14 @@ export const NotifyButton = ({
 	const [state, setState] = useState<"idle" | "loading" | "done" | "error">("idle");
 	const [msg, setMsg] = useState("");
 
-	if (!pushSupported() || personName.trim().length < 2) return null;
+	if (personName.trim().length < 2) return null;
+	if (!pushSupported()) {
+		return (
+			<p className="text-center text-xs text-muted-foreground">
+				Para recibir avisos, instala la app (Compartir → “Añadir a inicio”).
+			</p>
+		);
+	}
 
 	const go = async () => {
 		setState("loading");

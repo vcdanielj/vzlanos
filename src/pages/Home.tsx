@@ -1,7 +1,6 @@
-import { LifeBuoy, MapPin, PhoneCall, Search, Share2 } from "lucide-react";
+import { HeartHandshake, LifeBuoy, MapPin, PhoneCall, Search, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { InstallPrompt } from "@/components/InstallPrompt";
-import { ShareButtons } from "@/components/ShareButtons";
 import { VersesBanner } from "@/components/VersesBanner";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -26,6 +25,13 @@ const actions = [
 		title: "Buscar a un familiar",
 		desc: "Reporta o sigue a un ser querido desaparecido.",
 		tone: "bg-vzla-blue text-white",
+	},
+	{
+		to: "/encontrar",
+		icon: HeartHandshake,
+		title: "Encontré a una persona",
+		desc: "Hospitales, iglesias o albergues: registra a quien recibiste, con foto.",
+		tone: "bg-teal-600 text-white",
 	},
 	{
 		to: "/ayuda",
@@ -72,7 +78,6 @@ export const Home = () => (
 			))}
 		</div>
 
-		<ShareButtons />
 		<InstallPrompt />
 	</div>
 );

@@ -209,7 +209,9 @@ export const Mapa = () => {
 										)}
 										<Badge
 											variant={
-												r.status === "rescatado" || r.status === "a_salvo"
+												r.status === "rescatado" ||
+												r.status === "a_salvo" ||
+												r.status === "encontrado"
 													? "success"
 													: r.status === "en_progreso"
 														? "warning"

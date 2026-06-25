@@ -2,6 +2,7 @@ import { desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { db } from "../db/client.ts";
 import { reports } from "../db/schema.ts";
+import { isRescuer } from "../lib/auth.ts";
 
 const app = new Hono();
 
@@ -28,6 +29,10 @@ const pfifStatus = (status: string): string => {
 // GET /export/pfif — registros PFIF 1.4 de personas buscadas, para que
 // Protección Civil / Cruz Roja crucen con sus bases (reunificación oficial).
 app.get("/pfif", async (c) => {
+	// PII de víctimas: solo para autoridades/organizaciones con token (no scraping público).
+	if (!isRescuer(c)) {
+		return c.json({ error: "No autorizado. Requiere token de organización." }, 401);
+	}
 	const rows = await db
 		.select()
 		.from(reports)
