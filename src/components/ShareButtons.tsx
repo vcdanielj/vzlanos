@@ -68,33 +68,25 @@ export const ShareButtons = () => {
 	];
 
 	return (
-		<div className="flex flex-wrap items-center justify-center gap-2">
-			<span className="text-xs font-semibold text-foreground/70">Comparte vzlanos:</span>
+		<div className="flex flex-wrap items-center justify-center gap-2.5">
 			{items.map((it) => (
 				<button
 					key={it.label}
 					type="button"
 					onClick={it.onClick}
 					aria-label={`Compartir en ${it.label}`}
-					className={`flex h-9 w-9 items-center justify-center rounded-full text-white transition-opacity hover:opacity-90 ${it.tone}`}
+					className={`flex h-11 w-11 items-center justify-center rounded-full text-white shadow-sm transition-transform hover:scale-105 active:scale-95 ${it.tone}`}
 				>
-					<it.icon className="h-4 w-4" />
+					<it.icon className="h-5 w-5" />
 				</button>
 			))}
 			<button
 				type="button"
 				onClick={copyLink}
 				aria-label="Copiar enlace"
-				className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-foreground transition-opacity hover:opacity-90"
+				className="flex h-11 w-11 items-center justify-center rounded-full border bg-background text-foreground shadow-sm transition-transform hover:scale-105 active:scale-95"
 			>
-				{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-			</button>
-			<button
-				type="button"
-				onClick={nativeShare}
-				className="flex h-9 items-center gap-1.5 rounded-full bg-vzla-blue px-3 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-			>
-				<Share2 className="h-4 w-4" /> Compartir
+				{copied ? <Check className="h-5 w-5 text-emerald-600" /> : <Copy className="h-5 w-5" />}
 			</button>
 		</div>
 	);

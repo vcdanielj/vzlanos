@@ -112,21 +112,53 @@ export const App = () => {
 						<Route path="/mapa" element={<Mapa />} />
 					</Routes>
 				</main>
-				<footer className="safe-bottom mt-4 border-t bg-muted/30 py-6 text-center text-xs text-muted-foreground">
-					<div className="container space-y-4">
-						<ShareButtons />
-						<p className="font-medium text-foreground/80">
-							Hecho con <span className="text-vzla-red">❤️</span> por venezolanos de{" "}
-							<a
-								href="https://arizon.ai"
-								target="_blank"
-								rel="noreferrer"
-								className="font-semibold text-vzla-blue underline-offset-2 hover:underline"
-							>
-								arizon.ai
-							</a>
-							, para venezolanos 🇻🇪🤝🙏
-						</p>
+				<footer className="safe-bottom mt-8 border-t bg-slate-50">
+					<div className="container space-y-5 py-8">
+						<div className="space-y-3 text-center">
+							<p className="text-sm font-semibold text-foreground/80">
+								Comparte vzlanos y ayuda a salvar vidas
+							</p>
+							<ShareButtons />
+						</div>
+						<nav className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs font-medium text-muted-foreground">
+							<Link to="/reportar" className="hover:text-foreground">
+								Reportar
+							</Link>
+							<Link to="/buscar" className="hover:text-foreground">
+								Buscar
+							</Link>
+							<Link to="/encontrar" className="hover:text-foreground">
+								Encontré a alguien
+							</Link>
+							<Link to="/mapa" className="hover:text-foreground">
+								Mapa
+							</Link>
+							<Link to="/oracion" className="hover:text-foreground">
+								Oración
+							</Link>
+							<Link to="/ayuda" className="hover:text-foreground">
+								Ayuda
+							</Link>
+						</nav>
+						<div className="flex flex-col items-center gap-2.5 border-t pt-5">
+							<div className="flex h-1 w-14 overflow-hidden rounded-full">
+								<div className="flex-1 bg-vzla-yellow" />
+								<div className="flex-1 bg-vzla-blue" />
+								<div className="flex-1 bg-vzla-red" />
+							</div>
+							<p className="text-xs font-medium text-foreground/70">
+								Hecho con <span className="text-vzla-red">❤️</span> por venezolanos de{" "}
+								<a
+									href="https://arizon.ai"
+									target="_blank"
+									rel="noreferrer"
+									className="font-semibold text-vzla-blue underline-offset-2 hover:underline"
+								>
+									arizon.ai
+								</a>
+								, para venezolanos 🇻🇪
+							</p>
+						</div>
 					</div>
 				</footer>
 			</div>
