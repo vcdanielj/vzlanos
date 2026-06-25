@@ -1,13 +1,19 @@
-import { Siren } from "lucide-react";
+import { MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
+import {
+	Link,
+	Navigate,
+	Route,
+	BrowserRouter as Router,
+	Routes,
+} from "react-router-dom";
 import { flushQueue, pendingCount } from "./lib/api";
 import { Ayuda } from "./pages/Ayuda";
 import { Buscar } from "./pages/Buscar";
+import { Compartir } from "./pages/Compartir";
 import { Home } from "./pages/Home";
 import { Mapa } from "./pages/Mapa";
 import { Reportar } from "./pages/Reportar";
-import { Sos } from "./pages/Sos";
 
 export const App = () => {
 	const [pending, setPending] = useState(pendingCount());
@@ -36,7 +42,6 @@ export const App = () => {
 					<div className="container flex h-14 items-center justify-between gap-2">
 						<Link to="/" className="flex shrink-0 items-baseline gap-1.5">
 							<span className="text-lg font-bold tracking-tight">vzlanos</span>
-							<span className="hidden text-xs text-muted-foreground sm:inline">Rescate</span>
 						</Link>
 						<div className="flex items-center gap-2 md:gap-4">
 							<nav className="flex items-center gap-2 text-xs md:gap-4 md:text-sm">
@@ -60,11 +65,11 @@ export const App = () => {
 								</Link>
 							</nav>
 							<Link
-								to="/sos"
+								to="/reportar"
 								className="inline-flex h-9 items-center gap-1.5 rounded-full bg-destructive px-3 text-sm font-semibold text-destructive-foreground transition-opacity hover:opacity-90"
-								aria-label="Pedir ayuda SOS"
+								aria-label="Reportar personas atrapadas"
 							>
-								<Siren className="h-4 w-4" /> SOS
+								<MapPin className="h-4 w-4" /> Reportar
 							</Link>
 						</div>
 					</div>
@@ -78,17 +83,32 @@ export const App = () => {
 				<main className="container flex w-full flex-1 flex-col py-6">
 					<Routes>
 						<Route path="/" element={<Home />} />
-						<Route path="/sos" element={<Sos />} />
+						{/* /sos se fusionó en /reportar: redirigir enlaces viejos. */}
+						<Route path="/sos" element={<Navigate to="/reportar" replace />} />
 						<Route path="/reportar" element={<Reportar />} />
+						<Route path="/compartir" element={<Compartir />} />
 						<Route path="/buscar" element={<Buscar />} />
 						<Route path="/ayuda" element={<Ayuda />} />
 						<Route path="/mapa" element={<Mapa />} />
 					</Routes>
 				</main>
 				<footer className="safe-bottom border-t py-6 text-center text-xs text-muted-foreground">
-					<div className="container">
-						Herramienta comunitaria de emergencia. Si hay vidas en riesgo, llama también a
-						los servicios de emergencia.
+					<div className="container space-y-2">
+						<p>
+							Herramienta comunitaria de emergencia. Si hay vidas en riesgo, llama también a
+							los servicios de emergencia.
+						</p>
+						<p className="text-[10px] text-muted-foreground/50">
+							powered by{" "}
+							<a
+								href="https://arizon.ai"
+								target="_blank"
+								rel="noreferrer"
+								className="underline-offset-2 hover:underline"
+							>
+								arizon.ai
+							</a>
+						</p>
 					</div>
 				</footer>
 			</div>

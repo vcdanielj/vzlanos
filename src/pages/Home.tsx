@@ -1,20 +1,20 @@
-import { LifeBuoy, MapPin, PhoneCall, Search, Siren } from "lucide-react";
+import { LifeBuoy, MapPin, PhoneCall, Search, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 
 const actions = [
 	{
-		to: "/sos",
-		icon: Siren,
-		title: "Estoy atrapado (SOS)",
-		desc: "Envía tu ubicación ahora para que te rescaten.",
+		to: "/reportar",
+		icon: MapPin,
+		title: "Reportar personas atrapadas",
+		desc: "Marca en el mapa dónde hay alguien atrapado (tú u otra persona).",
 		tone: "bg-destructive text-destructive-foreground",
 	},
 	{
-		to: "/reportar",
-		icon: MapPin,
-		title: "Reportar atrapados",
-		desc: "Marca en el mapa dónde hay personas atrapadas.",
+		to: "/compartir",
+		icon: Share2,
+		title: "Compartir mi ubicación",
+		desc: "Envía dónde estás a tu familia por WhatsApp para que pidan ayuda.",
 		tone: "bg-amber-500 text-white",
 	},
 	{
@@ -43,17 +43,19 @@ export const Home = () => (
 				Ayuda a localizar personas atrapadas
 			</h1>
 			<p className="text-muted-foreground">
-				Reporta, pide ayuda o busca a un ser querido. Tu reporte aparece en el mapa de los
-				equipos de rescate.
+				Reporta, comparte tu ubicación o busca a un ser querido. Tu reporte aparece en el mapa
+				de los equipos de rescate.
 			</p>
 		</div>
 
 		<div className="grid gap-3 sm:grid-cols-2">
 			{actions.map((a) => (
-				<Link key={a.to} to={a.to}>
+				<Link key={a.to} to={a.to} aria-label={a.title}>
 					<Card className="transition-shadow hover:shadow-md">
 						<CardContent className="flex items-start gap-4 p-5">
-							<div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${a.tone}`}>
+							<div
+								className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${a.tone}`}
+							>
 								<a.icon className="h-6 w-6" />
 							</div>
 							<div>
