@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { createPrayer, listPrayers, prayFor } from "@/lib/api";
+import { createPrayer, listPrayers, openPrayerStream, prayFor } from "@/lib/api";
 import type { Prayer } from "@shared/types";
 
 const timeAgo = (iso: string): string => {
@@ -45,20 +45,15 @@ export const Oracion = () => {
 
 	useEffect(() => {
 		load();
-		let id: ReturnType<typeof setInterval> | undefined = setInterval(load, 12000);
-		const onVis = () => {
-			if (document.hidden) {
-				if (id) clearInterval(id);
-				id = undefined;
-			} else {
-				load();
-				if (!id) id = setInterval(load, 12000);
-			}
-		};
-		document.addEventListener("visibilitychange", onVis);
+		// Tiempo real: cada mensaje nuevo llega al instante por SSE.
+		const closeStream = openPrayerStream((p) => {
+			setPrayers((prev) => (prev.some((x) => x.id === p.id) ? prev : [p, ...prev]));
+		});
+		// Respaldo lento por si el stream se cae detrás de un proxy.
+		const poll = setInterval(load, 30000);
 		return () => {
-			if (id) clearInterval(id);
-			document.removeEventListener("visibilitychange", onVis);
+			closeStream();
+			clearInterval(poll);
 		};
 	}, [load]);
 
@@ -100,6 +95,13 @@ export const Oracion = () => {
 			<div className="space-y-1 text-center">
 				<h1 className="flex items-center justify-center gap-2 text-xl font-bold">
 					<HandHeart className="h-5 w-5 text-vzla-blue" /> Sala de oración
+					<span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+						<span className="relative flex h-2 w-2">
+							<span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+							<span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600" />
+						</span>
+						En vivo
+					</span>
 				</h1>
 				<p className="text-sm text-muted-foreground">
 					Comparte tu petición o una palabra de aliento. Oramos juntos por Venezuela 🇻🇪

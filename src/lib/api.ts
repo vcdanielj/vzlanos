@@ -145,6 +145,19 @@ export const createPrayer = async (input: {
 	return data.prayer as Prayer;
 };
 
+// Conexión en vivo (SSE): recibe cada mensaje nuevo al instante.
+export const openPrayerStream = (onPrayer: (p: Prayer) => void): (() => void) => {
+	const es = new EventSource("/api/prayers/stream");
+	es.addEventListener("prayer", (e) => {
+		try {
+			onPrayer(JSON.parse((e as MessageEvent).data) as Prayer);
+		} catch {
+			/* mensaje malformado */
+		}
+	});
+	return () => es.close();
+};
+
 export const prayFor = async (id: number): Promise<Prayer> => {
 	const res = await fetch(`/api/prayers/${id}/pray`, { method: "POST" });
 	if (!res.ok) throw new Error("No se pudo registrar");

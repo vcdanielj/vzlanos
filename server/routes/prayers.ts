@@ -1,10 +1,12 @@
 import { desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
+import { streamSSE } from "hono/streaming";
 import { z } from "zod";
 import type { Prayer } from "../../shared/types.ts";
 import { db } from "../db/client.ts";
 import { type PrayerRow, prayers } from "../db/schema.ts";
 import { isRescuer } from "../lib/auth.ts";
+import { bus } from "../lib/event-bus.ts";
 import { moderate } from "../lib/moderation.ts";
 import { rateLimit } from "../lib/ratelimit.ts";
 
@@ -57,8 +59,27 @@ app.post("/", async (c) => {
 		.insert(prayers)
 		.values({ name: parsed.data.name?.trim() || null, text: parsed.data.text })
 		.returning();
-	return c.json({ prayer: toPublic(row) }, 201);
+	const pub = toPublic(row);
+	// Difunde el mensaje en tiempo real a los clientes conectados por SSE.
+	bus.emit("prayer", pub);
+	return c.json({ prayer: pub }, 201);
 });
+
+// GET /api/prayers/stream — chat en vivo: empuja los mensajes nuevos por SSE.
+app.get("/stream", (c) =>
+	streamSSE(c, async (stream) => {
+		const onPrayer = (p: Prayer) => {
+			void stream.writeSSE({ data: JSON.stringify(p), event: "prayer" });
+		};
+		bus.on("prayer", onPrayer);
+		stream.onAbort(() => bus.off("prayer", onPrayer));
+		// Mantiene viva la conexión (algunos proxies cierran a los ~30-60s de silencio).
+		while (true) {
+			await stream.sleep(25000);
+			await stream.writeSSE({ data: "1", event: "ping" });
+		}
+	}),
+);
 
 // POST /api/prayers/:id/pray — sumar un 🙏.
 app.post("/:id/pray", async (c) => {
