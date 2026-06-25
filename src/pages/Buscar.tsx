@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { createReport, geocode, searchByName } from "@/lib/api";
 import { fileToResizedBase64 } from "@/lib/image";
+import { SitiosAliados } from "@/components/SitiosAliados";
 import type { Report } from "@shared/types";
 import { SEX_OPTIONS } from "@shared/types";
 
@@ -485,7 +486,7 @@ const MarcarASalvo = () => {
 };
 
 export const Buscar = () => (
-	<div className="mx-auto max-w-md">
+	<div className="mx-auto max-w-md space-y-4">
 		<Card>
 			<CardHeader>
 				<CardTitle className="flex items-center gap-2">
@@ -513,5 +514,6 @@ export const Buscar = () => (
 				</Tabs>
 			</CardContent>
 		</Card>
+		<SitiosAliados />
 	</div>
 );

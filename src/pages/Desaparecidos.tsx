@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { SitiosAliados } from "@/components/SitiosAliados";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -554,6 +555,8 @@ export const Desaparecidos = () => {
 					</Button>
 				</div>
 			)}
+
+			<SitiosAliados />
 
 			<p className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
 				Los datos son provistos por{" "}

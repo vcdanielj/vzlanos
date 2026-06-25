@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { listReports } from "@/lib/api";
 import type { Report } from "@shared/types";
+import { SitiosAliados } from "@/components/SitiosAliados";
 
 // Tablero público de reunificación: personas reportadas en vzlanos (búsquedas y
 // encontrados). Cada tarjeta trae foto, datos y acciones (contactar familia,
@@ -124,6 +125,8 @@ export const Reunir = () => {
 					<PersonCard key={r.id} report={r} />
 				))}
 			</div>
+
+			<SitiosAliados />
 		</div>
 	);
 };
