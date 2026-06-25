@@ -75,7 +75,11 @@ export const App = () => {
 					</div>
 				</header>
 				{pending > 0 && (
-					<div className="bg-amber-500 px-4 py-1.5 text-center text-xs font-medium text-white">
+					<div
+						role="status"
+						aria-live="polite"
+						className="bg-amber-500 px-4 py-1.5 text-center text-xs font-medium text-white"
+					>
 						{pending} reporte{pending > 1 ? "s" : ""} pendiente
 						{pending > 1 ? "s" : ""} de enviar — se reintentará al volver la conexión.
 					</div>

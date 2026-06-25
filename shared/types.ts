@@ -52,6 +52,8 @@ export interface CreateReportInput {
 	reporterName?: string | null;
 	reporterContact?: string | null;
 	reporterCountry?: string | null;
+	website?: string; // honeypot anti-bot (siempre vacío en humanos)
+	selfSafe?: boolean; // auto-reporte "estoy a salvo" (fija status a_salvo)
 }
 
 export interface GeocodeResult {

@@ -224,6 +224,73 @@ const SeguirEstado = () => {
 	);
 };
 
+const MarcarASalvo = () => {
+	const [name, setName] = useState("");
+	const [note, setNote] = useState("");
+	const [submitting, setSubmitting] = useState(false);
+	const [done, setDone] = useState(false);
+	const [error, setError] = useState("");
+
+	const submit = async () => {
+		if (!name.trim()) {
+			setError("Escribe tu nombre.");
+			return;
+		}
+		setError("");
+		setSubmitting(true);
+		try {
+			await createReport({
+				type: "busqueda_persona",
+				personName: name.trim(),
+				description: note.trim() || "Se reportó a salvo.",
+				selfSafe: true,
+			});
+			setDone(true);
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "No se pudo enviar.");
+		} finally {
+			setSubmitting(false);
+		}
+	};
+
+	if (done) {
+		return (
+			<div className="space-y-3 p-2 text-center">
+				<CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />
+				<h3 className="font-bold">Te marcaste a salvo</h3>
+				<p className="text-sm text-muted-foreground">
+					Tu familia puede verlo buscando tu nombre en esta página.
+				</p>
+			</div>
+		);
+	}
+
+	return (
+		<div className="space-y-3">
+			<p className="text-sm text-muted-foreground">
+				Si estás bien, repórtalo para que tu familia deje de buscarte.
+			</p>
+			<div className="space-y-2">
+				<Label htmlFor="safe-name">Tu nombre completo *</Label>
+				<Input id="safe-name" value={name} onChange={(e) => setName(e.target.value)} />
+			</div>
+			<div className="space-y-2">
+				<Label htmlFor="safe-note">Mensaje (opcional)</Label>
+				<Textarea
+					id="safe-note"
+					placeholder="Estoy bien, en casa de…"
+					value={note}
+					onChange={(e) => setNote(e.target.value)}
+				/>
+			</div>
+			{error && <p className="text-sm text-destructive">{error}</p>}
+			<Button className="w-full" size="lg" disabled={submitting} onClick={submit}>
+				{submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Marcarme a salvo"}
+			</Button>
+		</div>
+	);
+};
+
 export const Buscar = () => (
 	<div className="mx-auto max-w-md">
 		<Card>
@@ -234,17 +301,21 @@ export const Buscar = () => (
 			</CardHeader>
 			<CardContent>
 				<Tabs defaultValue="seguir">
-					<TabsList className="grid w-full grid-cols-2 gap-1">
-						<TabsTrigger value="seguir">Buscar / seguir</TabsTrigger>
+					<TabsList className="grid w-full grid-cols-3 gap-1">
+						<TabsTrigger value="seguir">Buscar</TabsTrigger>
 						<TabsTrigger value="reportar">
 							<UserPlus className="mr-1 h-4 w-4" /> Reportar
 						</TabsTrigger>
+						<TabsTrigger value="salvo">A salvo</TabsTrigger>
 					</TabsList>
 					<TabsContent value="seguir">
 						<SeguirEstado />
 					</TabsContent>
 					<TabsContent value="reportar">
 						<ReportarDesaparecido />
+					</TabsContent>
+					<TabsContent value="salvo">
+						<MarcarASalvo />
 					</TabsContent>
 				</Tabs>
 			</CardContent>

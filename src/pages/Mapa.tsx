@@ -1,4 +1,4 @@
-import { Loader2, RefreshCw, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Loader2, Navigation, RefreshCw, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { MapView } from "@/components/MapView";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,8 @@ import {
 	setRescuerToken,
 	updateReport,
 } from "@/lib/api";
+import { toPlusCode } from "@/lib/pluscode";
+import { directionsUrl } from "@/lib/share";
 import type { Report, ReportStatus } from "@shared/types";
 import { STATUS_LABELS, TYPE_LABELS } from "@shared/types";
 
@@ -92,7 +94,24 @@ export const Mapa = () => {
 		}
 	};
 
+	const verify = async (r: Report) => {
+		setActionError("");
+		try {
+			await updateReport(r.id, { verified: true });
+			load();
+		} catch (e) {
+			setActionError(e instanceof Error ? e.message : "No se pudo verificar");
+			setTimeout(() => setActionError(""), 4000);
+		}
+	};
+
 	const isRescuer = savedToken.length > 0;
+	const counts = {
+		total: reports.length,
+		nuevo: reports.filter((r) => r.status === "nuevo").length,
+		en_progreso: reports.filter((r) => r.status === "en_progreso").length,
+		rescatado: reports.filter((r) => r.status === "rescatado").length,
+	};
 
 	return (
 		<div className="mx-auto max-w-3xl space-y-4">
@@ -127,6 +146,19 @@ export const Mapa = () => {
 						{f.label}
 					</Button>
 				))}
+			</div>
+
+			<div className="flex flex-wrap gap-2 text-xs">
+				<span className="rounded-md bg-muted px-2 py-1">Total: {counts.total}</span>
+				<span className="rounded-md bg-destructive/10 px-2 py-1 text-destructive">
+					Nuevos: {counts.nuevo}
+				</span>
+				<span className="rounded-md bg-amber-500/10 px-2 py-1 text-amber-700">
+					En progreso: {counts.en_progreso}
+				</span>
+				<span className="rounded-md bg-emerald-600/10 px-2 py-1 text-emerald-700">
+					Rescatados: {counts.rescatado}
+				</span>
 			</div>
 
 			<Card>
@@ -169,23 +201,49 @@ export const Mapa = () => {
 													: "Reporte")}
 										</div>
 									</div>
-									<Badge
-										variant={
-											r.status === "rescatado" || r.status === "a_salvo"
-												? "success"
-												: r.status === "en_progreso"
-													? "warning"
-													: "destructive"
-										}
-									>
-										{STATUS_LABELS[r.status]}
-									</Badge>
+									<div className="flex shrink-0 items-center gap-1">
+										{r.verified && (
+											<Badge variant="secondary" className="gap-1">
+												<BadgeCheck className="h-3 w-3" /> Verificado
+											</Badge>
+										)}
+										<Badge
+											variant={
+												r.status === "rescatado" || r.status === "a_salvo"
+													? "success"
+													: r.status === "en_progreso"
+														? "warning"
+														: "destructive"
+											}
+										>
+											{STATUS_LABELS[r.status]}
+										</Badge>
+									</div>
 								</div>
+								{(r.injured || r.floor) && (
+									<div className="flex flex-wrap gap-1.5">
+										{r.injured && <Badge variant="destructive">Hay heridos</Badge>}
+										{r.floor && <Badge variant="outline">Piso: {r.floor}</Badge>}
+									</div>
+								)}
 								{r.description && (
 									<p className="text-sm text-muted-foreground">{r.description}</p>
 								)}
 								{r.lastKnownAddress && (
 									<p className="text-sm text-muted-foreground">📍 {r.lastKnownAddress}</p>
+								)}
+								{r.lat != null && r.lng != null && (
+									<div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+										<code className="font-mono">{toPlusCode(r.lat, r.lng)}</code>
+										<a
+											className="inline-flex items-center gap-1 text-sky-700 underline"
+											href={directionsUrl(r.lat, r.lng)}
+											target="_blank"
+											rel="noreferrer"
+										>
+											<Navigation className="h-3 w-3" /> Cómo llegar
+										</a>
+									</div>
 								)}
 								{isRescuer && r.reporterContact && (
 									<p className="text-sm">
@@ -195,10 +253,24 @@ export const Mapa = () => {
 										</a>
 									</p>
 								)}
-								{isRescuer && next && (
-									<Button size="sm" className="w-full" onClick={() => mutate(r, next.to)}>
-										{next.label}
-									</Button>
+								{isRescuer && (next || !r.verified) && (
+									<div className="flex gap-2">
+										{!r.verified && (
+											<Button
+												size="sm"
+												variant="outline"
+												className="flex-1"
+												onClick={() => verify(r)}
+											>
+												<BadgeCheck className="h-4 w-4" /> Verificar
+											</Button>
+										)}
+										{next && (
+											<Button size="sm" className="flex-1" onClick={() => mutate(r, next.to)}>
+												{next.label}
+											</Button>
+										)}
+									</div>
 								)}
 							</CardContent>
 						</Card>

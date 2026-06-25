@@ -100,6 +100,8 @@ app.post("/", async (c) => {
 			reporterName: data.reporterName ?? null,
 			reporterContact: data.reporterContact ?? null,
 			reporterCountry: data.reporterCountry ?? null,
+			// Único status fijable por el público: "a salvo" (auto-reporte). Resto = nuevo.
+			...(data.selfSafe && data.type === "busqueda_persona" ? { status: "a_salvo" } : {}),
 		})
 		.returning();
 

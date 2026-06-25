@@ -16,6 +16,8 @@ export const createReportSchema = z
 		description: trimmedString(2000),
 		// Honeypot anti-bot: campo oculto que un humano nunca llena.
 		website: z.string().max(200).optional(),
+		// Auto-reporte "estoy a salvo": único status que el público puede fijar al crear.
+		selfSafe: z.boolean().optional(),
 		personName: trimmedString(200),
 		lastKnownAddress: trimmedString(500),
 		relation: trimmedString(100),
