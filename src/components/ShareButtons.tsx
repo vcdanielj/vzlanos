@@ -11,7 +11,7 @@ import { useState } from "react";
 
 const SHARE_URL = "https://vzlanos.com";
 const SHARE_TEXT =
-	"Ayuda a localizar personas atrapadas o desaparecidas tras el terremoto 🇻🇪";
+	"vzlanos: encuentra y reúne a los tuyos tras el terremoto en Venezuela 🇻🇪";
 const enc = encodeURIComponent;
 
 // Fila compacta de compartir, pensada para el footer.

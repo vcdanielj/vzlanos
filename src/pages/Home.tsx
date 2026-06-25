@@ -65,11 +65,11 @@ export const Home = () => (
 				<LifeBuoy className="h-3.5 w-3.5" /> Respuesta a la emergencia 🇻🇪
 			</div>
 			<h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-				Ayuda a localizar personas atrapadas o desaparecidas
+				Encuentra y reúne a los tuyos
 			</h1>
 			<p className="text-muted-foreground">
-				Reporta, comparte tu ubicación o busca a un ser querido. Tu reporte aparece en el mapa
-				de los equipos de rescate.
+				Reporta a quien necesita rescate, comparte tu ubicación o busca a un ser querido. Cada
+				reporte llega a los equipos de rescate.
 			</p>
 		</div>
 
