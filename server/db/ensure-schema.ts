@@ -15,6 +15,8 @@ const createSchema = async () => {
 				lng double precision,
 				accuracy double precision,
 				people_count integer,
+				floor text,
+				injured boolean,
 				description text,
 				status text NOT NULL DEFAULT 'nuevo',
 				verified boolean NOT NULL DEFAULT false,
@@ -32,6 +34,9 @@ const createSchema = async () => {
 		await sql`CREATE INDEX IF NOT EXISTS reports_status_idx ON reports (status)`;
 		await sql`CREATE INDEX IF NOT EXISTS reports_type_idx ON reports (type)`;
 		await sql`CREATE INDEX IF NOT EXISTS reports_created_idx ON reports (created_at)`;
+		// Migración idempotente: agrega columnas nuevas a tablas ya existentes en prod.
+		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS floor text`;
+		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS injured boolean`;
 	} finally {
 		await sql.end();
 	}

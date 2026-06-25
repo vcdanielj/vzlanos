@@ -11,7 +11,11 @@ export const createReportSchema = z
 		lng: z.number().min(-180).max(180).optional().nullable(),
 		accuracy: z.number().nonnegative().optional().nullable(),
 		peopleCount: z.number().int().min(0).max(10000).optional().nullable(),
+		floor: trimmedString(50),
+		injured: z.boolean().optional().nullable(),
 		description: trimmedString(2000),
+		// Honeypot anti-bot: campo oculto que un humano nunca llena.
+		website: z.string().max(200).optional(),
 		personName: trimmedString(200),
 		lastKnownAddress: trimmedString(500),
 		relation: trimmedString(100),

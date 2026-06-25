@@ -5,6 +5,7 @@ import { db } from "../db/client.ts";
 import { reports, type ReportRow } from "../db/schema.ts";
 import { isRescuer } from "../lib/auth.ts";
 import { haversineMeters } from "../lib/geo.ts";
+import { rateLimit } from "../lib/ratelimit.ts";
 import {
 	createReportSchema,
 	searchSchema,
@@ -21,6 +22,8 @@ const toPublic = (row: ReportRow, includeContact: boolean): Report => ({
 	lng: row.lng,
 	accuracy: row.accuracy,
 	peopleCount: row.peopleCount,
+	floor: row.floor,
+	injured: row.injured,
 	description: row.description,
 	status: row.status as Report["status"],
 	verified: row.verified,
@@ -37,12 +40,25 @@ const toPublic = (row: ReportRow, includeContact: boolean): Report => ({
 
 // POST /api/reports — crear (público)
 app.post("/", async (c) => {
+	const ip =
+		c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
+		c.req.header("x-real-ip") ??
+		"unknown";
+	if (!rateLimit(`report:${ip}`, 20, 60_000)) {
+		return c.json({ error: "Demasiados envíos. Espera un momento." }, 429);
+	}
+
 	const body = await c.req.json().catch(() => null);
 	const parsed = createReportSchema.safeParse(body);
 	if (!parsed.success) {
 		return c.json({ error: "Datos inválidos", details: parsed.error.flatten() }, 400);
 	}
 	const data = parsed.data;
+
+	// Honeypot: si el campo oculto viene lleno, es un bot. Respondemos OK sin insertar.
+	if (data.website && data.website.trim().length > 0) {
+		return c.json({ report: null, ok: true }, 201);
+	}
 
 	// Dedupe: para SOS/tercero, si ya hay un reporte abierto a <40m en la última
 	// hora, devolvemos ese en vez de crear un pin duplicado (anti-spam).
@@ -75,6 +91,8 @@ app.post("/", async (c) => {
 			lng: data.lng ?? null,
 			accuracy: data.accuracy ?? null,
 			peopleCount: data.peopleCount ?? null,
+			floor: data.floor ?? null,
+			injured: data.injured ?? null,
 			description: data.description ?? null,
 			personName: data.personName ?? null,
 			lastKnownAddress: data.lastKnownAddress ?? null,

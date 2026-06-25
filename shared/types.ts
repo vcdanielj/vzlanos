@@ -19,6 +19,8 @@ export interface Report {
 	lng: number | null;
 	accuracy: number | null;
 	peopleCount: number | null;
+	floor: string | null;
+	injured: boolean | null;
 	description: string | null;
 	status: ReportStatus;
 	verified: boolean;
@@ -41,6 +43,8 @@ export interface CreateReportInput {
 	lng?: number | null;
 	accuracy?: number | null;
 	peopleCount?: number | null;
+	floor?: string | null;
+	injured?: boolean | null;
 	description?: string | null;
 	personName?: string | null;
 	lastKnownAddress?: string | null;

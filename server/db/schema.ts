@@ -20,6 +20,8 @@ export const reports = pgTable(
 		lng: doublePrecision("lng"),
 		accuracy: doublePrecision("accuracy"),
 		peopleCount: integer("people_count"),
+		floor: text("floor"),
+		injured: boolean("injured"),
 		description: text("description"),
 		// nuevo | en_progreso | rescatado | a_salvo | descartado
 		status: text("status").notNull().default("nuevo"),
