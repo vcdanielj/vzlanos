@@ -1,11 +1,11 @@
 import postgres from "postgres";
 
-// Crea la tabla en el arranque (idempotente). Evita depender de drizzle-kit
-// en runtime y de acceso externo a la DB (es interna al server en prod).
-export const ensureSchema = async () => {
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+const createSchema = async () => {
 	const url = process.env.DATABASE_URL;
 	if (!url) throw new Error("DATABASE_URL no está definida");
-	const sql = postgres(url, { max: 1 });
+	const sql = postgres(url, { max: 1, connect_timeout: 10 });
 	try {
 		await sql`
 			CREATE TABLE IF NOT EXISTS reports (
@@ -35,4 +35,35 @@ export const ensureSchema = async () => {
 	} finally {
 		await sql.end();
 	}
+};
+
+// Asegura el esquema con reintentos. NO tumba el server si falla: el sitio debe
+// cargar igual (la cola offline del cliente reintenta los reportes) y seguimos
+// intentando crear la tabla en segundo plano hasta lograrlo.
+export const ensureSchema = async (): Promise<boolean> => {
+	for (let attempt = 1; attempt <= 12; attempt++) {
+		try {
+			await createSchema();
+			console.log("Esquema de la DB asegurado.");
+			return true;
+		} catch (err) {
+			console.error(`ensureSchema intento ${attempt}/12 falló:`, (err as Error).message);
+			await sleep(5000);
+		}
+	}
+	console.error("ensureSchema: no se pudo asegurar el esquema tras 12 intentos. El server arranca igual y reintentará en background.");
+	// Reintento perezoso en background (cada 30s) por si la DB aparece luego.
+	void (async () => {
+		while (true) {
+			await sleep(30000);
+			try {
+				await createSchema();
+				console.log("Esquema de la DB asegurado (reintento background).");
+				return;
+			} catch {
+				// sigue intentando
+			}
+		}
+	})();
+	return false;
 };

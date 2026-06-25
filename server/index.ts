@@ -34,10 +34,8 @@ if (existsSync(distDir)) {
 
 const port = Number(process.env.PORT ?? 3000);
 
-await ensureSchema().catch((err) => {
-	console.error("Error asegurando el esquema de la DB:", err);
-	process.exit(1);
-});
+// No bloquea el arranque: el server debe levantar aunque la DB tarde.
+void ensureSchema();
 
 serve({ fetch: app.fetch, port }, (info) => {
 	console.log(`emergencia server escuchando en :${info.port}`);
