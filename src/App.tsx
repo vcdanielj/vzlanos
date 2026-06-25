@@ -21,6 +21,7 @@ import { Mapa } from "./pages/Mapa";
 import { Oracion } from "./pages/Oracion";
 import { Reportar } from "./pages/Reportar";
 import { Temblores } from "./pages/Temblores";
+import { Desaparecidos } from "./pages/Desaparecidos";
 
 export const App = () => {
 	const [pending, setPending] = useState(pendingCount());
@@ -93,6 +94,12 @@ export const App = () => {
 								>
 									<Activity className="hidden h-3.5 w-3.5 md:inline" /> Temblores
 								</Link>
+								<Link
+									to="/desaparecidos"
+									className="text-muted-foreground transition-colors hover:text-foreground"
+								>
+									Desaparecidos
+								</Link>
 							</nav>
 							<Link
 								to="/reportar"
@@ -130,6 +137,7 @@ export const App = () => {
 						<Route path="/ayuda" element={<Ayuda />} />
 						<Route path="/mapa" element={<Mapa />} />
 						<Route path="/temblores" element={<Temblores />} />
+						<Route path="/desaparecidos" element={<Desaparecidos />} />
 					</Routes>
 				</main>
 				<footer className="safe-bottom mt-8 border-t bg-slate-50">
@@ -158,6 +166,9 @@ export const App = () => {
 							</Link>
 							<Link to="/temblores" className="hover:text-foreground">
 								Temblores
+							</Link>
+							<Link to="/desaparecidos" className="hover:text-foreground">
+								Desaparecidos
 							</Link>
 							<Link to="/oracion" className="hover:text-foreground">
 								Oración

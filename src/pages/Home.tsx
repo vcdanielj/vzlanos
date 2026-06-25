@@ -53,6 +53,13 @@ const actions = [
 		tone: "bg-vzla-blue text-white",
 	},
 	{
+		to: "/desaparecidos",
+		icon: Users,
+		title: "Listado de desaparecidos",
+		desc: "Reportes de personas desaparecidas por el terremoto. Puedes marcar a quien fue recuperado.",
+		tone: "bg-vzla-red text-white",
+	},
+	{
 		to: "/temblores",
 		icon: Activity,
 		title: "Temblores recientes",
