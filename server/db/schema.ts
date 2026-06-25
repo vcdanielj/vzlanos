@@ -53,3 +53,24 @@ export const reports = pgTable(
 
 export type ReportRow = typeof reports.$inferSelect;
 export type NewReportRow = typeof reports.$inferInsert;
+
+// Suscripciones Web Push: avisar a la familia cuando aparezca novedad de una persona.
+export const pushSubs = pgTable(
+	"push_subs",
+	{
+		id: serial("id").primaryKey(),
+		endpoint: text("endpoint").notNull().unique(),
+		p256dh: text("p256dh").notNull(),
+		auth: text("auth").notNull(),
+		// Nombre (normalizado, minúsculas) de la persona por la que quieren aviso.
+		personName: text("person_name").notNull(),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.default(sql`now()`),
+	},
+	(t) => ({
+		nameIdx: index("push_subs_name_idx").on(t.personName),
+	}),
+);
+
+export type PushSubRow = typeof pushSubs.$inferSelect;

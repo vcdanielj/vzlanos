@@ -1,6 +1,7 @@
 import { Camera, CheckCircle2, Loader2, MapPin, Search, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { PickMap } from "@/components/MapView";
+import { NotifyButton } from "@/components/NotifyButton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -106,6 +107,7 @@ const ReportarDesaparecido = () => {
 							: "La búsqueda quedó registrada."}{" "}
 					Vuelve a esta página y busca por el nombre para seguir el estado.
 				</p>
+				<NotifyButton personName={name} className="w-full" />
 			</div>
 		);
 	}
@@ -280,6 +282,10 @@ const SeguirEstado = () => {
 					</Card>
 				))}
 			</div>
+
+			{results && results.length > 0 && (
+				<NotifyButton personName={query} className="w-full" />
+			)}
 		</div>
 	);
 };

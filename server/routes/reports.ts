@@ -5,6 +5,7 @@ import { db } from "../db/client.ts";
 import { reports, type ReportRow } from "../db/schema.ts";
 import { isRescuer } from "../lib/auth.ts";
 import { haversineMeters } from "../lib/geo.ts";
+import { notifyPersonSafe } from "../lib/push.ts";
 import { rateLimit } from "../lib/ratelimit.ts";
 import {
 	createReportSchema,
@@ -108,6 +109,11 @@ app.post("/", async (c) => {
 		})
 		.returning();
 
+	// Si alguien se auto-reporta a salvo, avisa a quienes lo buscaban.
+	if (data.selfSafe && data.type === "busqueda_persona" && inserted.personName) {
+		void notifyPersonSafe(inserted.personName, "a_salvo");
+	}
+
 	return c.json({ report: toPublic(inserted, false) }, 201);
 });
 
@@ -183,6 +189,15 @@ app.patch("/:id", async (c) => {
 	if (!updated) {
 		return c.json({ error: "No encontrado" }, 404);
 	}
+
+	// Al marcar a salvo / rescatado, avisa por Web Push a quienes la buscaban.
+	if (
+		(updated.status === "a_salvo" || updated.status === "rescatado") &&
+		updated.personName
+	) {
+		void notifyPersonSafe(updated.personName, updated.status);
+	}
+
 	return c.json({ report: toPublic(updated, true) });
 });
 

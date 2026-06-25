@@ -19,6 +19,40 @@ self.addEventListener("activate", (event) => {
 	self.clients.claim();
 });
 
+// Web Push: aviso "encontraron a tu familiar".
+self.addEventListener("push", (event) => {
+	let data = {};
+	try {
+		data = event.data ? event.data.json() : {};
+	} catch {
+		data = {};
+	}
+	event.waitUntil(
+		self.registration.showNotification(data.title || "vzlanos", {
+			body: data.body || "",
+			icon: "/icon-192.png",
+			badge: "/icon-192.png",
+			data: { url: data.url || "/" },
+		}),
+	);
+});
+
+self.addEventListener("notificationclick", (event) => {
+	event.notification.close();
+	const url = (event.notification.data && event.notification.data.url) || "/";
+	event.waitUntil(
+		self.clients.matchAll({ type: "window" }).then((list) => {
+			for (const c of list) {
+				if ("focus" in c) {
+					c.navigate(url);
+					return c.focus();
+				}
+			}
+			return self.clients.openWindow(url);
+		}),
+	);
+});
+
 self.addEventListener("fetch", (event) => {
 	const { request } = event;
 	// Nunca cachear API ni export: deben ir siempre a la red.
