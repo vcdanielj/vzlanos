@@ -72,7 +72,9 @@ app.get("/stream", (c) =>
 			void stream.writeSSE({ data: JSON.stringify(p), event: "prayer" });
 		};
 		bus.on("prayer", onPrayer);
-		stream.onAbort(() => bus.off("prayer", onPrayer));
+		stream.onAbort(() => {
+			bus.off("prayer", onPrayer);
+		});
 		// Mantiene viva la conexión (algunos proxies cierran a los ~30-60s de silencio).
 		while (true) {
 			await stream.sleep(25000);
