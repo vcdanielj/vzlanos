@@ -1,4 +1,4 @@
-import { and, desc, eq, gte, ilike, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import type { Report } from "../../shared/types.ts";
 import { db } from "../db/client.ts";
@@ -150,6 +150,8 @@ app.get("/", async (c) => {
 
 	const conditions = [];
 	if (status) conditions.push(eq(reports.status, status));
+	// Por defecto, el mapa no muestra los descartados (datos falsos/duplicados).
+	else conditions.push(ne(reports.status, "descartado"));
 	if (type) conditions.push(eq(reports.type, type));
 
 	const rows = await db
@@ -240,6 +242,15 @@ app.patch("/:id", async (c) => {
 	}
 
 	return c.json({ report: toPublic(updated, true) });
+});
+
+// DELETE /api/reports/:id — borrar un reporte (moderador con token).
+app.delete("/:id", async (c) => {
+	if (!isRescuer(c)) return c.json({ error: "No autorizado" }, 401);
+	const id = Number(c.req.param("id"));
+	if (!Number.isInteger(id)) return c.json({ error: "id inválido" }, 400);
+	await db.delete(reports).where(eq(reports.id, id));
+	return c.json({ ok: true });
 });
 
 export default app;
