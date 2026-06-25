@@ -36,14 +36,33 @@ export interface Report {
 	personName: string | null;
 	cedula: string | null; // enmascarada en público; completa para rescatistas
 	hasPhoto: boolean;
+	// Datos estructurados de la persona buscada.
+	age: number | null;
+	sex: string | null; // "F" | "M" | "otro"
+	lastSeen: string | null; // cuándo/dónde se le vio por última vez (texto)
 	lastKnownAddress: string | null;
 	relation: string | null;
 	reporterName: string | null;
 	reporterCountry: string | null;
-	// reporterContact solo se expone a rescatistas
+	// reporterContact: rescatistas siempre; público solo en busqueda_persona/encontrado.
 	reporterContact?: string | null;
+	// Cantidad de pistas ("tengo información") recibidas para este reporte.
+	tipCount: number;
 	createdAt: string;
 	updatedAt: string;
+}
+
+export const SEX_OPTIONS = ["F", "M", "otro"] as const;
+export type Sex = (typeof SEX_OPTIONS)[number];
+
+// Una pista enviada por alguien que tiene información de una persona buscada.
+export interface ReportTip {
+	id: number;
+	reportId: number;
+	message: string;
+	contact: string | null;
+	name: string | null;
+	createdAt: string;
 }
 
 export interface CreateReportInput {
@@ -58,6 +77,9 @@ export interface CreateReportInput {
 	description?: string | null;
 	personName?: string | null;
 	cedula?: string | null; // cédula de la persona (validación, cruce exacto)
+	age?: number | null;
+	sex?: string | null;
+	lastSeen?: string | null;
 	photo?: string | null; // base64 sin prefijo
 	photoMime?: string | null;
 	lastKnownAddress?: string | null;

@@ -1,5 +1,6 @@
 import { BadgeCheck, Loader2, Navigation, RefreshCw, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { MapView } from "@/components/MapView";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,10 @@ export const Mapa = () => {
 	const load = useCallback(async () => {
 		setLoading(true);
 		try {
-			setReports(await listReports(filter ? { status: filter } : undefined));
+			const all = await listReports(filter ? { status: filter } : undefined);
+			// El mapa de rescate es solo para personas atrapadas (SOS / reportes de
+			// terceros). Las búsquedas de desaparecidos viven en /desaparecidos.
+			setReports(all.filter((r) => r.type === "sos" || r.type === "tercero"));
 		} catch {
 			// silencioso; reintenta con el polling
 		} finally {
@@ -116,7 +120,15 @@ export const Mapa = () => {
 	return (
 		<div className="mx-auto max-w-3xl space-y-4">
 			<div className="flex items-center justify-between">
-				<h1 className="text-xl font-bold">Mapa de rescate</h1>
+				<div>
+					<h1 className="text-xl font-bold">Mapa de rescate</h1>
+					<p className="text-sm text-muted-foreground">
+						Personas atrapadas. ¿Buscas a un desaparecido?{" "}
+						<Link to="/desaparecidos" className="text-sky-700 underline">
+							Ver tablero
+						</Link>
+					</p>
+				</div>
 				<Button variant="outline" size="sm" onClick={load} disabled={loading}>
 					{loading ? (
 						<Loader2 className="h-4 w-4 animate-spin" />
@@ -189,6 +201,14 @@ export const Mapa = () => {
 					return (
 						<Card key={r.id}>
 							<CardContent className="space-y-2 p-4">
+								{r.hasPhoto && (
+									<img
+										src={`/api/reports/${r.id}/photo`}
+										alt={r.personName ?? "Reporte"}
+										className="h-32 w-full rounded-lg border object-cover"
+										loading="lazy"
+									/>
+								)}
 								<div className="flex items-start justify-between gap-2">
 									<div>
 										<div className="text-xs font-medium text-muted-foreground">

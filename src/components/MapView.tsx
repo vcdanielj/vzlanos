@@ -5,7 +5,12 @@ import { Circle, MapContainer, Marker, TileLayer, useMap, useMapEvents } from "r
 import type { Report, ReportStatus } from "@shared/types";
 import { STATUS_LABELS, TYPE_LABELS } from "@shared/types";
 import { toPlusCode } from "@/lib/pluscode";
-import { directionsUrl } from "@/lib/share";
+import {
+	directionsUrl,
+	tipToFamilyMessage,
+	toWhatsappNumber,
+	whatsappToUrl,
+} from "@/lib/share";
 
 // Color por estado (sin assets externos: usamos divIcon con HTML).
 const STATUS_COLOR: Record<ReportStatus, string> = {
@@ -71,8 +76,21 @@ const ClusterLayer = ({ reports }: { reports: Report[] }) => {
 		for (const r of reports) {
 			if (r.lat == null || r.lng == null) continue;
 			const plus = toPlusCode(r.lat, r.lng);
+			const photoTag = r.hasPhoto
+				? `<img src="/api/reports/${r.id}/photo" alt="Foto" loading="lazy"
+						style="width:100%;max-height:140px;object-fit:cover;border-radius:6px;margin-bottom:4px" />`
+				: "";
+			// Contacto a la familia solo para búsquedas/encontrados con un número usable.
+			const isReunif = r.type === "busqueda_persona" || r.type === "encontrado";
+			const waNumber = isReunif ? toWhatsappNumber(r.reporterContact) : null;
+			const contactTag = waNumber
+				? `<a href="${esc(whatsappToUrl(waNumber, tipToFamilyMessage(r.personName)))}"
+						target="_blank" rel="noreferrer"
+						style="display:inline-block;margin-top:4px;color:#16a34a;font-weight:600">Contactar por WhatsApp →</a>`
+				: "";
 			const popup = `
-				<div style="font-size:13px;line-height:1.4">
+				<div style="font-size:13px;line-height:1.4;min-width:160px">
+					${photoTag}
 					<div style="font-weight:600">${esc(TYPE_LABELS[r.type])}</div>
 					${r.personName ? `<div>Persona: ${esc(r.personName)}</div>` : ""}
 					${r.peopleCount != null ? `<div>Personas: ${r.peopleCount}</div>` : ""}
@@ -81,6 +99,7 @@ const ClusterLayer = ({ reports }: { reports: Report[] }) => {
 					<div style="color:#64748b;font-family:monospace">${esc(plus)}</div>
 					<a href="${directionsUrl(r.lat, r.lng)}" target="_blank" rel="noreferrer"
 						style="display:inline-block;margin-top:4px;color:#2563eb">Cómo llegar →</a>
+					${contactTag ? `<br/>${contactTag}` : ""}
 				</div>`;
 			L.marker([r.lat, r.lng], { icon: pinIcon(STATUS_COLOR[r.status]) })
 				.bindPopup(popup)

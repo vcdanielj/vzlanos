@@ -34,6 +34,10 @@ export const reports = pgTable(
 		personName: text("person_name"),
 		// Cédula de la persona (para validación y cruce exacto sin homónimos).
 		cedula: text("cedula"),
+		// Datos estructurados de la persona buscada.
+		age: integer("age"),
+		sex: text("sex"),
+		lastSeen: text("last_seen"),
 		// Foto del desaparecido: base64 (sin prefijo) + mime. Se sirve por /photo, no en listas.
 		photo: text("photo"),
 		photoMime: text("photo_mime"),
@@ -58,6 +62,28 @@ export const reports = pgTable(
 
 export type ReportRow = typeof reports.$inferSelect;
 export type NewReportRow = typeof reports.$inferInsert;
+
+// Pistas / avistamientos enviados por el público para una persona buscada.
+// Visibles solo para rescatistas (token); en público se muestra el conteo.
+export const reportTips = pgTable(
+	"report_tips",
+	{
+		id: serial("id").primaryKey(),
+		reportId: integer("report_id").notNull(),
+		message: text("message").notNull(),
+		// Contacto opcional de quien aporta la pista (para que la familia responda).
+		contact: text("contact"),
+		name: text("name"),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.default(sql`now()`),
+	},
+	(t) => ({
+		reportIdx: index("report_tips_report_idx").on(t.reportId),
+	}),
+);
+
+export type ReportTipRow = typeof reportTips.$inferSelect;
 
 // Suscripciones Web Push: avisar a la familia cuando aparezca novedad de una persona.
 export const pushSubs = pgTable(

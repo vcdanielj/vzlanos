@@ -14,6 +14,7 @@ import { Buscar } from "./pages/Buscar";
 import { CentrosAcopio } from "./pages/CentrosAcopio";
 import { Chat } from "./pages/Chat";
 import { Compartir } from "./pages/Compartir";
+import { Desaparecidos } from "./pages/Desaparecidos";
 import { EncontrarPersona } from "./pages/EncontrarPersona";
 import { Home } from "./pages/Home";
 import { Mapa } from "./pages/Mapa";
@@ -69,6 +70,12 @@ export const App = () => {
 									Buscar
 								</Link>
 								<Link
+									to="/desaparecidos"
+									className="text-muted-foreground transition-colors hover:text-foreground"
+								>
+									Desaparecidos
+								</Link>
+								<Link
 									to="/ayuda"
 									className="text-muted-foreground transition-colors hover:text-foreground"
 								>
@@ -115,6 +122,7 @@ export const App = () => {
 						<Route path="/reportar" element={<Reportar />} />
 						<Route path="/compartir" element={<Compartir />} />
 						<Route path="/buscar" element={<Buscar />} />
+						<Route path="/desaparecidos" element={<Desaparecidos />} />
 						<Route path="/encontrar" element={<EncontrarPersona />} />
 						<Route path="/oracion" element={<Oracion />} />
 						<Route path="/chat" element={<Chat />} />
@@ -138,6 +146,9 @@ export const App = () => {
 							</Link>
 							<Link to="/buscar" className="hover:text-foreground">
 								Buscar
+							</Link>
+							<Link to="/desaparecidos" className="hover:text-foreground">
+								Desaparecidos
 							</Link>
 							<Link to="/encontrar" className="hover:text-foreground">
 								Encontré a alguien

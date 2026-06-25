@@ -41,6 +41,20 @@ const createSchema = async () => {
 		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS photo_mime text`;
 		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS found_at text`;
 		await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS cedula text`;
+			await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS age integer`;
+			await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS sex text`;
+			await sql`ALTER TABLE reports ADD COLUMN IF NOT EXISTS last_seen text`;
+			await sql`
+				CREATE TABLE IF NOT EXISTS report_tips (
+					id serial PRIMARY KEY,
+					report_id integer NOT NULL,
+					message text NOT NULL,
+					contact text,
+					name text,
+					created_at timestamptz NOT NULL DEFAULT now()
+				)
+			`;
+			await sql`CREATE INDEX IF NOT EXISTS report_tips_report_idx ON report_tips (report_id)`;
 		await sql`
 			CREATE TABLE IF NOT EXISTS push_subs (
 				id serial PRIMARY KEY,

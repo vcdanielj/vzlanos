@@ -1,8 +1,8 @@
-import { Camera, CheckCircle2, Loader2, MapPin, Search, UserPlus } from "lucide-react";
+import { Camera, CheckCircle2, Loader2, Search, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { PickMap } from "@/components/MapView";
 import { NotifyButton } from "@/components/NotifyButton";
-import { Badge } from "@/components/ui/badge";
+import { PersonCard } from "@/components/PersonCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,21 +11,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { createReport, geocode, searchByName } from "@/lib/api";
 import { fileToResizedBase64 } from "@/lib/image";
-import type { Report, ReportStatus } from "@shared/types";
-import { STATUS_LABELS } from "@shared/types";
+import type { Report } from "@shared/types";
+import { SEX_OPTIONS } from "@shared/types";
 
-const statusVariant = (
-	s: ReportStatus,
-): "default" | "success" | "warning" | "destructive" | "secondary" => {
-	if (s === "a_salvo" || s === "rescatado" || s === "encontrado") return "success";
-	if (s === "en_progreso") return "warning";
-	if (s === "descartado") return "secondary";
-	return "destructive";
-};
+const SEX_LABELS: Record<string, string> = { F: "Mujer", M: "Hombre", otro: "Otro" };
 
 const ReportarDesaparecido = () => {
 	const [name, setName] = useState("");
 	const [cedula, setCedula] = useState("");
+	const [age, setAge] = useState("");
+	const [sex, setSex] = useState<string>("");
+	const [lastSeen, setLastSeen] = useState("");
 	const [address, setAddress] = useState("");
 	const [relation, setRelation] = useState("");
 	const [reporterName, setReporterName] = useState("");
@@ -58,6 +54,10 @@ const ReportarDesaparecido = () => {
 			setError("Escribe el nombre de la persona.");
 			return;
 		}
+		if (!contact.trim()) {
+			setError("Deja un contacto (WhatsApp) para que te avisen si la encuentran.");
+			return;
+		}
 		setError("");
 		setSubmitting(true);
 		try {
@@ -73,10 +73,18 @@ const ReportarDesaparecido = () => {
 					setLocated(false);
 				}
 			}
+			const parsedAge = age.trim() ? Number.parseInt(age.trim(), 10) : null;
+			const safeAge =
+				parsedAge != null && Number.isFinite(parsedAge) && parsedAge >= 0 && parsedAge <= 130
+					? parsedAge
+					: null;
 			await createReport({
 				type: "busqueda_persona",
 				personName: name.trim(),
 				cedula: cedula.trim() || null,
+				age: safeAge,
+				sex: sex || null,
+				lastSeen: lastSeen.trim() || null,
 				photo: photo?.base64 ?? null,
 				photoMime: photo?.mime ?? null,
 				lastKnownAddress: address.trim() || null,
@@ -115,82 +123,174 @@ const ReportarDesaparecido = () => {
 	}
 
 	return (
-		<div className="space-y-3">
-			<div className="space-y-2">
-				<Label htmlFor="name">Nombre completo de la persona *</Label>
-				<Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
-			</div>
-
-			<div className="space-y-2">
-				<Label htmlFor="dp-ced">Cédula (si la sabes)</Label>
-				<Input
-					id="dp-ced"
-					inputMode="numeric"
-					placeholder="V-12345678"
-					value={cedula}
-					onChange={(e) => setCedula(e.target.value)}
-				/>
-				<p className="text-xs text-muted-foreground">
-					Con la cédula, si la persona se reporta a salvo, tu búsqueda se actualiza sola.
-				</p>
-			</div>
-
-			<div className="space-y-2">
-				<Label>Foto (ayuda a identificarla)</Label>
-				<div className="flex items-center gap-3">
-					{photoPreview ? (
-						<img
-							src={photoPreview}
-							alt="Foto"
-							className="h-20 w-20 rounded-lg border object-cover"
-						/>
-					) : (
-						<div className="flex h-20 w-20 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-							<Camera className="h-6 w-6" />
-						</div>
-					)}
-					<label className="cursor-pointer rounded-md border px-3 py-2 text-sm hover:bg-accent">
-						{photoPreview ? "Cambiar foto" : "Subir foto"}
-						<input
-							type="file"
-							accept="image/*"
-							capture="environment"
-							className="hidden"
-							onChange={onPhoto}
-						/>
-					</label>
-				</div>
-			</div>
-
-			<div className="space-y-2">
-				<Label htmlFor="addr">Última dirección conocida</Label>
-				<Input
-					id="addr"
-					placeholder="Calle, edificio, ciudad…"
-					value={address}
-					onChange={(e) => setAddress(e.target.value)}
-				/>
-				<p className="text-xs text-muted-foreground">
-					La ubicamos en el mapa, o marca el punto exacto abajo.
-				</p>
-			</div>
-
-			<div className="space-y-1">
-				<Label>Marcar última ubicación en el mapa (opcional)</Label>
-				<PickMap value={pin} onChange={setPin} className="h-[32vh] min-h-[200px] md:h-[260px]" />
-			</div>
-			<div className="grid grid-cols-2 gap-3">
+		<div className="space-y-5">
+			{/* --- La persona --- */}
+			<section className="space-y-3">
+				<h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+					La persona
+				</h4>
 				<div className="space-y-2">
-					<Label htmlFor="rel">Parentesco</Label>
+					<Label htmlFor="name">Nombre completo *</Label>
+					<Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+				</div>
+
+				<div className="grid grid-cols-2 gap-3">
+					<div className="space-y-2">
+						<Label htmlFor="dp-age">Edad</Label>
+						<Input
+							id="dp-age"
+							inputMode="numeric"
+							placeholder="Años"
+							value={age}
+							onChange={(e) => setAge(e.target.value.replace(/\D/g, ""))}
+						/>
+					</div>
+					<div className="space-y-2">
+						<Label>Sexo</Label>
+						<div className="flex gap-1.5">
+							{SEX_OPTIONS.map((s) => (
+								<button
+									key={s}
+									type="button"
+									onClick={() => setSex(sex === s ? "" : s)}
+									className={`flex-1 rounded-md border px-2 py-2 text-sm ${
+										sex === s ? "border-vzla-blue bg-vzla-blue text-white" : "hover:bg-accent"
+									}`}
+								>
+									{SEX_LABELS[s]}
+								</button>
+							))}
+						</div>
+					</div>
+				</div>
+
+				<div className="space-y-2">
+					<Label htmlFor="dp-ced">Cédula (si la sabes)</Label>
 					<Input
-						id="rel"
-						placeholder="Madre, hermano…"
-						value={relation}
-						onChange={(e) => setRelation(e.target.value)}
+						id="dp-ced"
+						inputMode="numeric"
+						placeholder="V-12345678"
+						value={cedula}
+						onChange={(e) => setCedula(e.target.value)}
+					/>
+					<p className="text-xs text-muted-foreground">
+						Con la cédula, si la persona se reporta a salvo, tu búsqueda se actualiza sola.
+					</p>
+				</div>
+
+				<div className="space-y-2">
+					<Label>Foto (ayuda a identificarla)</Label>
+					<div className="flex items-center gap-3">
+						{photoPreview ? (
+							<img
+								src={photoPreview}
+								alt="Foto"
+								className="h-20 w-20 rounded-lg border object-cover"
+							/>
+						) : (
+							<div className="flex h-20 w-20 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+								<Camera className="h-6 w-6" />
+							</div>
+						)}
+						<label className="cursor-pointer rounded-md border px-3 py-2 text-sm hover:bg-accent">
+							{photoPreview ? "Cambiar foto" : "Subir foto"}
+							<input
+								type="file"
+								accept="image/*"
+								capture="environment"
+								className="hidden"
+								onChange={onPhoto}
+							/>
+						</label>
+					</div>
+				</div>
+
+				<div className="space-y-2">
+					<Label htmlFor="desc">Señas / qué llevaba puesto</Label>
+					<Textarea
+						id="desc"
+						placeholder="Ropa, estatura, señas particulares, condición médica…"
+						value={description}
+						onChange={(e) => setDescription(e.target.value)}
+					/>
+				</div>
+			</section>
+
+			{/* --- Última vez vista --- */}
+			<section className="space-y-3">
+				<h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+					Última vez vista
+				</h4>
+				<div className="space-y-2">
+					<Label htmlFor="dp-lastseen">¿Cuándo y dónde la viste por última vez?</Label>
+					<Input
+						id="dp-lastseen"
+						placeholder="Ej. ayer en la tarde, cerca de la plaza…"
+						value={lastSeen}
+						onChange={(e) => setLastSeen(e.target.value)}
 					/>
 				</div>
 				<div className="space-y-2">
-					<Label htmlFor="country">Tu país</Label>
+					<Label htmlFor="addr">Última dirección conocida</Label>
+					<Input
+						id="addr"
+						placeholder="Calle, edificio, ciudad…"
+						value={address}
+						onChange={(e) => setAddress(e.target.value)}
+					/>
+					<p className="text-xs text-muted-foreground">
+						La ubicamos en el mapa, o marca el punto exacto abajo.
+					</p>
+				</div>
+				<div className="space-y-1">
+					<Label>Marcar última ubicación en el mapa (opcional)</Label>
+					<PickMap
+						value={pin}
+						onChange={setPin}
+						className="h-[32vh] min-h-[200px] md:h-[260px]"
+					/>
+				</div>
+			</section>
+
+			{/* --- Cómo contactarte --- */}
+			<section className="space-y-3">
+				<h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+					Cómo contactarte
+				</h4>
+				<div className="space-y-2">
+					<Label htmlFor="contact">Tu WhatsApp *</Label>
+					<Input
+						id="contact"
+						inputMode="tel"
+						placeholder="Ej. 0412 1234567"
+						value={contact}
+						onChange={(e) => setContact(e.target.value)}
+					/>
+					<p className="text-xs text-muted-foreground">
+						Quien la encuentre podrá escribirte aquí. Aparece como botón, no como texto.
+					</p>
+				</div>
+				<div className="grid grid-cols-2 gap-3">
+					<div className="space-y-2">
+						<Label htmlFor="rname">Tu nombre</Label>
+						<Input
+							id="rname"
+							value={reporterName}
+							onChange={(e) => setReporterName(e.target.value)}
+						/>
+					</div>
+					<div className="space-y-2">
+						<Label htmlFor="rel">Parentesco</Label>
+						<Input
+							id="rel"
+							placeholder="Madre, hermano…"
+							value={relation}
+							onChange={(e) => setRelation(e.target.value)}
+						/>
+					</div>
+				</div>
+				<div className="space-y-2">
+					<Label htmlFor="country">Tu país (si estás fuera)</Label>
 					<Input
 						id="country"
 						placeholder="España, EE.UU.…"
@@ -198,33 +298,8 @@ const ReportarDesaparecido = () => {
 						onChange={(e) => setCountry(e.target.value)}
 					/>
 				</div>
-			</div>
-			<div className="space-y-2">
-				<Label htmlFor="rname">Tu nombre</Label>
-				<Input
-					id="rname"
-					value={reporterName}
-					onChange={(e) => setReporterName(e.target.value)}
-				/>
-			</div>
-			<div className="space-y-2">
-				<Label htmlFor="contact">Tu contacto (teléfono / email / WhatsApp)</Label>
-				<Input
-					id="contact"
-					placeholder="Para que te avisen si la encuentran"
-					value={contact}
-					onChange={(e) => setContact(e.target.value)}
-				/>
-			</div>
-			<div className="space-y-2">
-				<Label htmlFor="desc">Datos útiles</Label>
-				<Textarea
-					id="desc"
-					placeholder="Edad, ropa, señas, condición médica…"
-					value={description}
-					onChange={(e) => setDescription(e.target.value)}
-				/>
-			</div>
+			</section>
+
 			{error && <p className="text-sm text-destructive">{error}</p>}
 			<Button className="w-full" size="lg" disabled={submitting} onClick={submit}>
 				{submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : "Registrar búsqueda"}
@@ -270,47 +345,9 @@ const SeguirEstado = () => {
 				</p>
 			)}
 
-			<div className="space-y-2">
+			<div className="space-y-3">
 				{results?.map((r) => (
-					<Card key={r.id}>
-						<CardContent className="flex items-start gap-3 p-4">
-							{r.hasPhoto && (
-								<img
-									src={`/api/reports/${r.id}/photo`}
-									alt={r.personName ?? "Persona"}
-									className="h-16 w-16 shrink-0 rounded-lg border object-cover"
-									loading="lazy"
-								/>
-							)}
-							<div className="flex-1">
-								<div className="flex flex-wrap items-center gap-1.5">
-									<span className="font-semibold">{r.personName}</span>
-									{(r.hasPhoto || r.cedula) && (
-										<span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
-											✓ Con evidencia
-										</span>
-									)}
-								</div>
-								{r.cedula && (
-									<div className="text-xs text-muted-foreground">Cédula: {r.cedula}</div>
-								)}
-								{r.foundAt && (
-									<div className="text-xs font-medium text-teal-700">
-										✓ Encontrada en {r.foundAt}
-									</div>
-								)}
-								{r.lastKnownAddress && (
-									<div className="flex items-center gap-1 text-xs text-muted-foreground">
-										<MapPin className="h-3 w-3" /> {r.lastKnownAddress}
-									</div>
-								)}
-								{r.description && (
-									<div className="mt-1 text-sm text-muted-foreground">{r.description}</div>
-								)}
-							</div>
-							<Badge variant={statusVariant(r.status)}>{STATUS_LABELS[r.status]}</Badge>
-						</CardContent>
-					</Card>
+					<PersonCard key={r.id} report={r} />
 				))}
 			</div>
 

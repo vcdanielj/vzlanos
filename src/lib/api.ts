@@ -5,6 +5,7 @@ import type {
 	GeocodeResult,
 	Prayer,
 	Report,
+	ReportTip,
 } from "@shared/types";
 
 const RESCUER_TOKEN_KEY = "rescuer_token";
@@ -120,6 +121,34 @@ export const updateReport = async (
 	if (!res.ok) throw new Error("No se pudo actualizar");
 	const data = await res.json();
 	return data.report as Report;
+};
+
+// --- Pistas / avistamientos sobre una persona buscada ---
+export const sendTip = async (
+	reportId: number,
+	input: { message: string; contact?: string | null; name?: string | null },
+): Promise<ReportTip> => {
+	const res = await fetch(`/api/reports/${reportId}/tip`, {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(input),
+	});
+	if (!res.ok) {
+		const body = await res.json().catch(() => ({}));
+		throw new Error(body.error ?? "No se pudo enviar la pista");
+	}
+	const data = await res.json();
+	return data.tip as ReportTip;
+};
+
+export const listTips = async (reportId: number): Promise<ReportTip[]> => {
+	const res = await fetch(`/api/reports/${reportId}/tips`, {
+		headers: rescuerHeaders(),
+	});
+	if (res.status === 401) throw new Error("Token de rescatista inválido");
+	if (!res.ok) throw new Error("No se pudieron cargar las pistas");
+	const data = await res.json();
+	return data.tips as ReportTip[];
 };
 
 // --- Sala de oración ---

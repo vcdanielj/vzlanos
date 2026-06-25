@@ -9,6 +9,7 @@ import {
 	PhoneCall,
 	Search,
 	Share2,
+	Users,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { InstallPrompt } from "@/components/InstallPrompt";
@@ -35,6 +36,13 @@ const actions = [
 		icon: Search,
 		title: "Buscar a un familiar",
 		desc: "Reporta o sigue a un ser querido desaparecido.",
+		tone: "bg-vzla-blue text-white",
+	},
+	{
+		to: "/desaparecidos",
+		icon: Users,
+		title: "Personas desaparecidas",
+		desc: "Mira quién está siendo buscado. Si reconoces a alguien, deja una pista.",
 		tone: "bg-vzla-blue text-white",
 	},
 	{

@@ -1,14 +1,16 @@
-import { and, desc, eq, gte, ilike, inArray, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ilike, inArray, ne, sql } from "drizzle-orm";
 import { Hono } from "hono";
-import type { Report } from "../../shared/types.ts";
+import type { Report, ReportTip } from "../../shared/types.ts";
 import { db } from "../db/client.ts";
-import { reports, type ReportRow } from "../db/schema.ts";
+import { reports, type ReportRow, reportTips, type ReportTipRow } from "../db/schema.ts";
 import { isRescuer } from "../lib/auth.ts";
 import { haversineMeters } from "../lib/geo.ts";
-import { notifyPersonSafe } from "../lib/push.ts";
+import { moderate } from "../lib/moderation.ts";
+import { notifyPersonSafe, notifyTipReceived } from "../lib/push.ts";
 import { rateLimit } from "../lib/ratelimit.ts";
 import {
 	createReportSchema,
+	createTipSchema,
 	searchSchema,
 	updateReportSchema,
 } from "../lib/validation.ts";
@@ -27,33 +29,69 @@ const maskCedula = (c: string | null): string | null => {
 	return c.length <= 4 ? "•••" : `••••${c.slice(-4)}`;
 };
 
-// Convierte una fila DB a la forma pública; oculta el contacto salvo rescatistas.
-const toPublic = (row: ReportRow, includeContact: boolean): Report => ({
+// Tipos cuyo contacto del reportante es público (la familia QUIERE ser contactada
+// para reunificar). En SOS/tercero el contacto queda solo para rescatistas.
+const isReunificationType = (type: string): boolean =>
+	type === "busqueda_persona" || type === "encontrado";
+
+// Convierte una fila DB a la forma pública.
+// - `includeContact` (rescatista): ve cédula completa y contacto en todo reporte.
+// - Público: cédula enmascarada; contacto visible solo en reunificación.
+const toPublic = (row: ReportRow, includeContact: boolean, tipCount = 0): Report => {
+	const contactVisible = includeContact || isReunificationType(row.type);
+	return {
+		id: row.id,
+		type: row.type as Report["type"],
+		lat: row.lat,
+		lng: row.lng,
+		accuracy: row.accuracy,
+		peopleCount: row.peopleCount,
+		floor: row.floor,
+		injured: row.injured,
+		foundAt: row.foundAt,
+		description: row.description,
+		status: row.status as Report["status"],
+		verified: row.verified,
+		claimedBy: row.claimedBy,
+		personName: row.personName,
+		// Cédula completa solo para rescatistas; enmascarada para el público.
+		cedula: includeContact ? row.cedula : maskCedula(row.cedula),
+		hasPhoto: !!(row.photo && row.photo.length > 0),
+		age: row.age,
+		sex: row.sex,
+		lastSeen: row.lastSeen,
+		lastKnownAddress: row.lastKnownAddress,
+		relation: row.relation,
+		reporterName: row.reporterName,
+		reporterCountry: row.reporterCountry,
+		...(contactVisible ? { reporterContact: row.reporterContact } : {}),
+		tipCount,
+		createdAt: row.createdAt.toISOString(),
+		updatedAt: row.updatedAt.toISOString(),
+	};
+};
+
+const toPublicTip = (row: ReportTipRow): ReportTip => ({
 	id: row.id,
-	type: row.type as Report["type"],
-	lat: row.lat,
-	lng: row.lng,
-	accuracy: row.accuracy,
-	peopleCount: row.peopleCount,
-	floor: row.floor,
-	injured: row.injured,
-	foundAt: row.foundAt,
-	description: row.description,
-	status: row.status as Report["status"],
-	verified: row.verified,
-	claimedBy: row.claimedBy,
-	personName: row.personName,
-	// Cédula completa solo para rescatistas; enmascarada para el público.
-	cedula: includeContact ? row.cedula : maskCedula(row.cedula),
-	hasPhoto: !!(row.photo && row.photo.length > 0),
-	lastKnownAddress: row.lastKnownAddress,
-	relation: row.relation,
-	reporterName: row.reporterName,
-	reporterCountry: row.reporterCountry,
-	...(includeContact ? { reporterContact: row.reporterContact } : {}),
+	reportId: row.reportId,
+	message: row.message,
+	contact: row.contact,
+	name: row.name,
 	createdAt: row.createdAt.toISOString(),
-	updatedAt: row.updatedAt.toISOString(),
 });
+
+// Cuenta pistas por reporte en una sola query (evita N+1 en el tablero).
+const tipCountsFor = async (ids: number[]): Promise<Map<number, number>> => {
+	const map = new Map<number, number>();
+	if (!ids.length) return map;
+	const rows = await db
+		.select({ reportId: reportTips.reportId, n: sql<number>`count(*)::int` })
+		.from(reportTips)
+		.where(inArray(reportTips.reportId, ids))
+		.groupBy(reportTips.reportId);
+	for (const r of rows) map.set(r.reportId, r.n);
+	return map;
+};
 
 // POST /api/reports — crear (público)
 app.post("/", async (c) => {
@@ -109,6 +147,9 @@ app.post("/", async (c) => {
 			description: data.description ?? null,
 			personName: data.personName ?? null,
 			cedula: normCedula(data.cedula),
+			age: data.age ?? null,
+			sex: data.sex ?? null,
+			lastSeen: data.lastSeen ?? null,
 			photo: data.photo ?? null,
 			photoMime: data.photoMime ?? null,
 			lastKnownAddress: data.lastKnownAddress ?? null,
@@ -182,7 +223,8 @@ app.get("/", async (c) => {
 		.orderBy(desc(reports.createdAt))
 		.limit(2000);
 
-	return c.json({ reports: rows.map((r) => toPublic(r, rescuer)) });
+	const tips = await tipCountsFor(rows.map((r) => r.id));
+	return c.json({ reports: rows.map((r) => toPublic(r, rescuer, tips.get(r.id) ?? 0)) });
 });
 
 // GET /api/reports/search?name= — seguimiento por nombre (familiares)
@@ -206,7 +248,8 @@ app.get("/search", async (c) => {
 		.where(ilike(reports.personName, `%${safe}%`))
 		.orderBy(desc(reports.updatedAt))
 		.limit(100);
-	return c.json({ reports: rows.map((r) => toPublic(r, false)) });
+	const tips = await tipCountsFor(rows.map((r) => r.id));
+	return c.json({ reports: rows.map((r) => toPublic(r, false, tips.get(r.id) ?? 0)) });
 });
 
 // GET /api/reports/:id/photo — sirve la foto del desaparecido (base64 → bytes)
@@ -225,6 +268,65 @@ app.get("/:id/photo", async (c) => {
 		"Content-Type": safeMime,
 		"Cache-Control": "public, max-age=3600",
 	});
+});
+
+// POST /api/reports/:id/tip — alguien aporta una pista/avistamiento (público).
+app.post("/:id/tip", async (c) => {
+	const ip =
+		c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ??
+		c.req.header("x-real-ip") ??
+		"unknown";
+	if (!rateLimit(`tip:${ip}`, 10, 60_000)) {
+		return c.json({ error: "Demasiadas pistas. Espera un momento." }, 429);
+	}
+	const id = Number(c.req.param("id"));
+	if (!Number.isInteger(id)) return c.json({ error: "id inválido" }, 400);
+
+	const [report] = await db.select().from(reports).where(eq(reports.id, id)).limit(1);
+	if (!report) return c.json({ error: "No encontrado" }, 404);
+	// Solo tiene sentido aportar pistas sobre búsquedas / personas encontradas.
+	if (!isReunificationType(report.type)) {
+		return c.json({ error: "Este reporte no admite pistas." }, 400);
+	}
+
+	const body = await c.req.json().catch(() => null);
+	const parsed = createTipSchema.safeParse(body);
+	if (!parsed.success) {
+		return c.json({ error: "Escribe la información que tienes." }, 400);
+	}
+	const mod = moderate(parsed.data.message);
+	if (!mod.ok) {
+		return c.json({ error: mod.reason ?? "Mensaje no permitido." }, 400);
+	}
+
+	const [tip] = await db
+		.insert(reportTips)
+		.values({
+			reportId: id,
+			message: parsed.data.message,
+			contact: parsed.data.contact ?? null,
+			name: parsed.data.name ?? null,
+		})
+		.returning();
+
+	// Avisa por Web Push a la familia que vigila a esta persona.
+	void notifyTipReceived(report.personName);
+
+	return c.json({ tip: toPublicTip(tip) }, 201);
+});
+
+// GET /api/reports/:id/tips — ver las pistas recibidas (rescatista).
+app.get("/:id/tips", async (c) => {
+	if (!isRescuer(c)) return c.json({ error: "No autorizado" }, 401);
+	const id = Number(c.req.param("id"));
+	if (!Number.isInteger(id)) return c.json({ error: "id inválido" }, 400);
+	const rows = await db
+		.select()
+		.from(reportTips)
+		.where(eq(reportTips.reportId, id))
+		.orderBy(asc(reportTips.createdAt))
+		.limit(200);
+	return c.json({ tips: rows.map(toPublicTip) });
 });
 
 // PATCH /api/reports/:id — mutar estado (rescatista)
