@@ -32,6 +32,7 @@ export const Mapa = () => {
 	const [filter, setFilter] = useState("");
 	const [token, setTokenState] = useState(getRescuerToken());
 	const [savedToken, setSavedToken] = useState(getRescuerToken());
+	const [actionError, setActionError] = useState("");
 
 	const load = useCallback(async () => {
 		setLoading(true);
@@ -44,11 +45,34 @@ export const Mapa = () => {
 		}
 	}, [filter]);
 
-	// Polling cada 15s para ver reportes nuevos sin recargar.
+	// Polling cada 15s para ver reportes nuevos. Se pausa si la pestaña está
+	// oculta (ahorra batería/datos) y refresca al volver a primer plano.
 	useEffect(() => {
+		let id: ReturnType<typeof setInterval> | undefined;
+		const start = () => {
+			if (id == null) id = setInterval(load, 15000);
+		};
+		const stop = () => {
+			if (id != null) {
+				clearInterval(id);
+				id = undefined;
+			}
+		};
+		const onVisibility = () => {
+			if (document.hidden) {
+				stop();
+			} else {
+				load();
+				start();
+			}
+		};
 		load();
-		const id = setInterval(load, 15000);
-		return () => clearInterval(id);
+		start();
+		document.addEventListener("visibilitychange", onVisibility);
+		return () => {
+			stop();
+			document.removeEventListener("visibilitychange", onVisibility);
+		};
 	}, [load]);
 
 	const saveToken = () => {
@@ -58,11 +82,13 @@ export const Mapa = () => {
 	};
 
 	const mutate = async (r: Report, to: ReportStatus) => {
+		setActionError("");
 		try {
 			await updateReport(r.id, { status: to });
 			load();
 		} catch (e) {
-			alert(e instanceof Error ? e.message : "No se pudo actualizar");
+			setActionError(e instanceof Error ? e.message : "No se pudo actualizar");
+			setTimeout(() => setActionError(""), 4000);
 		}
 	};
 
@@ -82,7 +108,13 @@ export const Mapa = () => {
 				</Button>
 			</div>
 
-			<MapView reports={reports} height={360} />
+			<MapView reports={reports} />
+
+			{actionError && (
+				<div className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+					{actionError}
+				</div>
+			)}
 
 			<div className="flex flex-wrap gap-2">
 				{FILTERS.map((f) => (

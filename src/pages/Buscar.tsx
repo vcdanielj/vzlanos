@@ -226,7 +226,7 @@ export const Buscar = () => (
 			</CardHeader>
 			<CardContent>
 				<Tabs defaultValue="seguir">
-					<TabsList className="grid w-full grid-cols-2">
+					<TabsList className="grid w-full grid-cols-2 gap-1">
 						<TabsTrigger value="seguir">Buscar / seguir</TabsTrigger>
 						<TabsTrigger value="reportar">
 							<UserPlus className="mr-1 h-4 w-4" /> Reportar

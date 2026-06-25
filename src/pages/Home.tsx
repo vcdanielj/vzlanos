@@ -34,7 +34,7 @@ const actions = [
 ];
 
 export const Home = () => (
-	<div className="mx-auto max-w-2xl space-y-6">
+	<div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 py-4">
 		<div className="space-y-2 text-center">
 			<div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
 				<LifeBuoy className="h-3.5 w-3.5" /> Respuesta a la emergencia

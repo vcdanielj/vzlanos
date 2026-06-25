@@ -1,7 +1,26 @@
 import L from "leaflet";
-import { MapContainer, Marker, Popup, TileLayer, useMapEvents } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from "react-leaflet";
 import type { Report, ReportStatus } from "@shared/types";
 import { STATUS_LABELS, TYPE_LABELS } from "@shared/types";
+
+// Recalcula el tamaño del mapa al montar y en resize/orientación (evita tiles grises
+// cuando el contenedor cambia de tamaño o se monta dentro de un layout flex/tab).
+const InvalidateOnResize = () => {
+	const map = useMap();
+	useEffect(() => {
+		const fix = () => map.invalidateSize();
+		const t = setTimeout(fix, 50);
+		window.addEventListener("resize", fix);
+		window.addEventListener("orientationchange", fix);
+		return () => {
+			clearTimeout(t);
+			window.removeEventListener("resize", fix);
+			window.removeEventListener("orientationchange", fix);
+		};
+	}, [map]);
+	return null;
+};
 
 // Color por estado (sin assets externos: usamos divIcon con HTML).
 const STATUS_COLOR: Record<ReportStatus, string> = {
@@ -25,19 +44,24 @@ const DEFAULT_CENTER: [number, number] = [10.4806, -66.9036];
 
 interface MapViewProps {
 	reports: Report[];
-	height?: number;
+	className?: string;
 	onSelect?: (r: Report) => void;
 }
 
-export const MapView = ({ reports, height = 420, onSelect }: MapViewProps) => {
+export const MapView = ({
+	reports,
+	className = "h-[45vh] min-h-[260px] md:h-[420px]",
+	onSelect,
+}: MapViewProps) => {
 	const withCoords = reports.filter((r) => r.lat != null && r.lng != null);
 	const center: [number, number] = withCoords.length
 		? [withCoords[0].lat as number, withCoords[0].lng as number]
 		: DEFAULT_CENTER;
 
 	return (
-		<div style={{ height }} className="overflow-hidden rounded-xl border">
+		<div className={`overflow-hidden rounded-xl border ${className}`}>
 			<MapContainer center={center} zoom={13} scrollWheelZoom>
+				<InvalidateOnResize />
 				<TileLayer
 					attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -72,7 +96,7 @@ export const MapView = ({ reports, height = 420, onSelect }: MapViewProps) => {
 interface PickMapProps {
 	value: { lat: number; lng: number } | null;
 	onChange: (coords: { lat: number; lng: number }) => void;
-	height?: number;
+	className?: string;
 }
 
 const ClickHandler = ({
@@ -85,11 +109,16 @@ const ClickHandler = ({
 };
 
 // Mapa para elegir/ajustar una ubicación tocando el mapa.
-export const PickMap = ({ value, onChange, height = 300 }: PickMapProps) => {
+export const PickMap = ({
+	value,
+	onChange,
+	className = "h-[40vh] min-h-[240px] md:h-[320px]",
+}: PickMapProps) => {
 	const center: [number, number] = value ? [value.lat, value.lng] : DEFAULT_CENTER;
 	return (
-		<div style={{ height }} className="overflow-hidden rounded-xl border">
+		<div className={`overflow-hidden rounded-xl border ${className}`}>
 			<MapContainer center={center} zoom={value ? 16 : 12} scrollWheelZoom>
+				<InvalidateOnResize />
 				<TileLayer
 					attribution='&copy; OpenStreetMap'
 					url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
