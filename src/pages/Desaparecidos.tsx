@@ -48,7 +48,9 @@ interface ApiResponse {
 
 // ─── API helpers ──────────────────────────────────────────────────────────────
 
-const API = "https://desaparecidos-terremoto-api.theempire.tech/api";
+// Mismo origen: pasa por nuestro proxy backend (/api/personas) para evitar el
+// bloqueo CORS de la API externa (que no envía Access-Control-Allow-Origin).
+const API = "/api";
 const PAGE_SIZE = 20;
 
 async function fetchPersonas(

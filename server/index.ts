@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { logger } from "hono/logger";
 import { ensureSchema } from "./db/ensure-schema.ts";
 import chatRoutes from "./routes/chat.ts";
+import desaparecidosProxyRoutes from "./routes/desaparecidos-proxy.ts";
 import geocodeRoutes from "./routes/geocode.ts";
 import earthquakeRoutes from "./routes/earthquakes.ts";
 import pfifRoutes from "./routes/pfif.ts";
@@ -23,6 +24,7 @@ app.route("/api/earthquakes", earthquakeRoutes);
 app.route("/api/push", pushRoutes);
 app.route("/api/prayers", prayerRoutes);
 app.route("/api/chat", chatRoutes);
+app.route("/api/personas", desaparecidosProxyRoutes);
 app.route("/export", pfifRoutes);
 
 // En producción servimos el build de Vite (dist). Primero los archivos reales

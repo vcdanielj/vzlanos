@@ -20,8 +20,8 @@ import { Home } from "./pages/Home";
 import { Mapa } from "./pages/Mapa";
 import { Oracion } from "./pages/Oracion";
 import { Reportar } from "./pages/Reportar";
+import { Reunir } from "./pages/Reunir";
 import { Temblores } from "./pages/Temblores";
-import { Desaparecidos } from "./pages/Desaparecidos";
 
 export const App = () => {
 	const [pending, setPending] = useState(pendingCount());
@@ -89,16 +89,16 @@ export const App = () => {
 									Mapa
 								</Link>
 								<Link
+									to="/reunir"
+									className="text-muted-foreground transition-colors hover:text-foreground"
+								>
+									Reunir
+								</Link>
+								<Link
 									to="/temblores"
 									className="text-muted-foreground transition-colors hover:text-foreground"
 								>
 									<Activity className="hidden h-3.5 w-3.5 md:inline" /> Temblores
-								</Link>
-								<Link
-									to="/desaparecidos"
-									className="text-muted-foreground transition-colors hover:text-foreground"
-								>
-									Desaparecidos
 								</Link>
 							</nav>
 							<Link
@@ -137,7 +137,7 @@ export const App = () => {
 						<Route path="/ayuda" element={<Ayuda />} />
 						<Route path="/mapa" element={<Mapa />} />
 						<Route path="/temblores" element={<Temblores />} />
-						<Route path="/desaparecidos" element={<Desaparecidos />} />
+						<Route path="/reunir" element={<Reunir />} />
 					</Routes>
 				</main>
 				<footer className="safe-bottom mt-8 border-t bg-slate-50">
@@ -167,8 +167,8 @@ export const App = () => {
 							<Link to="/temblores" className="hover:text-foreground">
 								Temblores
 							</Link>
-							<Link to="/desaparecidos" className="hover:text-foreground">
-								Desaparecidos
+							<Link to="/reunir" className="hover:text-foreground">
+								Reunir
 							</Link>
 							<Link to="/oracion" className="hover:text-foreground">
 								Oración

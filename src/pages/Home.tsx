@@ -39,10 +39,10 @@ const actions = [
 		tone: "bg-vzla-blue text-white",
 	},
 	{
-		to: "/desaparecidos",
+		to: "/reunir",
 		icon: Users,
-		title: "Personas desaparecidas",
-		desc: "Mira quién está siendo buscado. Si reconoces a alguien, deja una pista.",
+		title: "Reúne a los tuyos",
+		desc: "Personas reportadas en vzlanos. Si reconoces a alguien, deja una pista o contacta a su familia.",
 		tone: "bg-vzla-blue text-white",
 	},
 	{
