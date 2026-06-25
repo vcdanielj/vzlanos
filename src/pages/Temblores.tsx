@@ -45,7 +45,7 @@ export const Temblores = () => {
 		setLoading(true);
 		setError("");
 		try {
-			const data = await listEarthquakes({ hours, limit: 40 });
+			const data = await listEarthquakes({ hours });
 			setEarthquakes(data);
 			setLastUpdated(new Date().toISOString());
 		} catch (err) {

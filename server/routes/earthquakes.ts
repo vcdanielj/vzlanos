@@ -7,7 +7,6 @@ const app = new Hono();
 
 const querySchema = z.object({
 	hours: z.coerce.number().int().min(1).max(24 * 30).default(24 * 7),
-	limit: z.coerce.number().int().min(1).max(100).default(30),
 });
 
 const VENEZUELA_BOUNDS = {
@@ -100,8 +99,8 @@ app.get("/", async (c) => {
 		return c.json({ error: "Parámetros inválidos" }, 400);
 	}
 
-	const { hours, limit } = parsed.data;
-	const cacheKey = `${hours}:${limit}`;
+	const { hours } = parsed.data;
+	const cacheKey = `${hours}`;
 	const cached = responseCache.get(cacheKey);
 	if (cached && cached.expiresAt > Date.now()) {
 		c.header("Cache-Control", "public, max-age=60");
@@ -112,7 +111,8 @@ app.get("/", async (c) => {
 	const url = new URL("https://earthquake.usgs.gov/fdsnws/event/1/query");
 	url.searchParams.set("format", "geojson");
 	url.searchParams.set("orderby", "time");
-	url.searchParams.set("limit", String(limit));
+	// Sin parámetro "limit": USGS devuelve todos los eventos en el área/período (hasta 20.000)
+	url.searchParams.set("limit", "20000");
 	url.searchParams.set("starttime", startTime);
 	url.searchParams.set("minlatitude", String(VENEZUELA_BOUNDS.minLatitude));
 	url.searchParams.set("maxlatitude", String(VENEZUELA_BOUNDS.maxLatitude));
@@ -125,7 +125,7 @@ app.get("/", async (c) => {
 				Accept: "application/json",
 				"User-Agent": "vzlanos/1.0 (consulta sísmica Venezuela)",
 			},
-			signal: AbortSignal.timeout(8000),
+			signal: AbortSignal.timeout(15_000),
 		});
 		if (!res.ok) {
 			return c.json({ error: "Servicio sísmico no disponible" }, 502);
