@@ -8,7 +8,7 @@ import {
 	Users,
 	X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -316,6 +316,17 @@ const ESTADOS = [
 	{ value: "localizado", label: "Recuperados" },
 ] as const;
 
+const isSpam = (p: Persona) => {
+	const fields = [p.nombre, p.contacto, p.descripcion, p.ubicacion].map(f => (f || "").toLowerCase());
+	return fields.some(f =>
+		f.includes("infinityhotel") ||
+		f.includes("infinity hotel") ||
+		f.includes("trustedf57") ||
+		f.includes("ibb.co/0jqhcqkw") ||
+		f.includes("padfdbffa2180")
+	);
+};
+
 export const Desaparecidos = () => {
 	const [personas, setPersonas] = useState<Persona[]>([]);
 	const [total, setTotal] = useState(0);
@@ -329,6 +340,9 @@ export const Desaparecidos = () => {
 	const [estado, setEstado] = useState<string>("todos");
 	const [dialog, setDialog] = useState<Persona | null>(null);
 	const [recoveredIds, setRecoveredIds] = useState<Set<string>>(new Set());
+
+	const visiblePersonas = useMemo(() => personas.filter(p => !isSpam(p)), [personas]);
+	const hiddenSpamCount = personas.length - visiblePersonas.length;
 
 	const load = useCallback(async (p: number, query: string, est: string) => {
 		setLoading(true);
@@ -483,20 +497,29 @@ export const Desaparecidos = () => {
 				</div>
 			)}
 
+			{/* Alerta de spam ocultado */}
+			{!loading && hiddenSpamCount > 0 && (
+				<div className="rounded-lg border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-800 flex items-center justify-between">
+					<span>
+						⚠️ Se ocultaron {hiddenSpamCount} reporte(s) sospechoso(s) de spam detectados automáticamente en esta página.
+					</span>
+				</div>
+			)}
+
 			{/* Lista */}
 			{loading ? (
 				<div className="flex justify-center py-12">
 					<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
 				</div>
-			) : personas.length === 0 ? (
+			) : visiblePersonas.length === 0 ? (
 				<Card>
 					<CardContent className="py-10 text-center text-sm text-muted-foreground">
-						No hay resultados para esta búsqueda.
+						No hay resultados válidos en esta página.
 					</CardContent>
 				</Card>
 			) : (
 				<div className="space-y-3">
-					{personas.map((p) => (
+					{visiblePersonas.map((p) => (
 						<PersonaCard
 							key={p.id}
 							persona={p}
