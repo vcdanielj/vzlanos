@@ -1,3 +1,4 @@
+import { Siren } from "lucide-react";
 import { useEffect } from "react";
 import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { flushQueue } from "./lib/api";
@@ -21,26 +22,45 @@ export const App = () => {
 
 	return (
 		<Router>
-			<div className="min-h-screen bg-background">
-				<header className="sticky top-0 z-10 border-b bg-background/90 backdrop-blur">
-					<div className="container flex h-14 items-center justify-between">
-						<Link to="/" className="font-bold tracking-tight">
-							🆘 Rescate
+			<div className="flex min-h-screen flex-col bg-background">
+				<header className="safe-top sticky top-0 z-20 border-b bg-background/90 backdrop-blur">
+					<div className="container flex h-14 items-center justify-between gap-2">
+						<Link to="/" className="flex shrink-0 items-baseline gap-1.5">
+							<span className="text-lg font-bold tracking-tight">vzlanos</span>
+							<span className="hidden text-xs text-muted-foreground sm:inline">Rescate</span>
 						</Link>
-						<nav className="flex items-center gap-4 text-sm">
-							<Link to="/buscar" className="text-muted-foreground hover:text-foreground">
-								Buscar
+						<div className="flex items-center gap-2 md:gap-4">
+							<nav className="flex items-center gap-2 text-xs md:gap-4 md:text-sm">
+								<Link
+									to="/buscar"
+									className="text-muted-foreground transition-colors hover:text-foreground"
+								>
+									Buscar
+								</Link>
+								<Link
+									to="/ayuda"
+									className="text-muted-foreground transition-colors hover:text-foreground"
+								>
+									Ayuda
+								</Link>
+								<Link
+									to="/mapa"
+									className="text-muted-foreground transition-colors hover:text-foreground"
+								>
+									Mapa
+								</Link>
+							</nav>
+							<Link
+								to="/sos"
+								className="inline-flex h-9 items-center gap-1.5 rounded-full bg-destructive px-3 text-sm font-semibold text-destructive-foreground transition-opacity hover:opacity-90"
+								aria-label="Pedir ayuda SOS"
+							>
+								<Siren className="h-4 w-4" /> SOS
 							</Link>
-							<Link to="/ayuda" className="text-muted-foreground hover:text-foreground">
-								Ayuda
-							</Link>
-							<Link to="/mapa" className="text-muted-foreground hover:text-foreground">
-								Mapa
-							</Link>
-						</nav>
+						</div>
 					</div>
 				</header>
-				<main className="container py-6">
+				<main className="container flex w-full flex-1 flex-col py-6">
 					<Routes>
 						<Route path="/" element={<Home />} />
 						<Route path="/sos" element={<Sos />} />
@@ -50,9 +70,11 @@ export const App = () => {
 						<Route path="/mapa" element={<Mapa />} />
 					</Routes>
 				</main>
-				<footer className="border-t py-6 text-center text-xs text-muted-foreground">
-					Herramienta comunitaria de emergencia. Si hay vidas en riesgo, llama también a
-					los servicios de emergencia.
+				<footer className="safe-bottom border-t py-6 text-center text-xs text-muted-foreground">
+					<div className="container">
+						Herramienta comunitaria de emergencia. Si hay vidas en riesgo, llama también a
+						los servicios de emergencia.
+					</div>
 				</footer>
 			</div>
 		</Router>

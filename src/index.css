@@ -43,3 +43,11 @@
 	width: 100%;
 	z-index: 0;
 }
+
+/* Safe-area (notch / barra inferior) para PWA en móvil. */
+.safe-top {
+	padding-top: env(safe-area-inset-top);
+}
+.safe-bottom {
+	padding-bottom: env(safe-area-inset-bottom);
+}

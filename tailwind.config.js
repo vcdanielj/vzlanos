@@ -5,7 +5,8 @@ export default {
 	theme: {
 		container: {
 			center: true,
-			padding: "1rem",
+			// max() respeta el notch lateral en landscape sin reducir el padding base.
+			padding: "max(1rem, env(safe-area-inset-left))",
 			screens: { "2xl": "1280px" },
 		},
 		extend: {
