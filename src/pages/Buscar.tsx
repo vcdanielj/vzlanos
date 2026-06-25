@@ -30,6 +30,8 @@ const ReportarDesaparecido = () => {
 	const [description, setDescription] = useState("");
 	const [submitting, setSubmitting] = useState(false);
 	const [done, setDone] = useState(false);
+	// null = sin dirección; true = ubicada en mapa; false = no se pudo ubicar.
+	const [located, setLocated] = useState<boolean | null>(null);
 	const [error, setError] = useState("");
 
 	const submit = async () => {
@@ -46,8 +48,10 @@ const ReportarDesaparecido = () => {
 				try {
 					const g = await geocode(address.trim());
 					coords = { lat: g.lat, lng: g.lng };
+					setLocated(true);
 				} catch {
 					coords = null; // si falla, igual guardamos el texto de la dirección
+					setLocated(false);
 				}
 			}
 			await createReport({
@@ -76,8 +80,12 @@ const ReportarDesaparecido = () => {
 				<CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />
 				<h3 className="font-bold">Reporte registrado</h3>
 				<p className="text-sm text-muted-foreground">
-					La búsqueda quedó registrada y, si pudimos ubicar la dirección, aparece en el mapa
-					de rescate. Vuelve a esta página y busca por el nombre para seguir el estado.
+					{located === true
+						? "La búsqueda quedó registrada y la dirección aparece en el mapa de rescate."
+						: located === false
+							? "La búsqueda quedó registrada, pero no pudimos ubicar la dirección en el mapa. Intenta de nuevo con una dirección más específica si puedes."
+							: "La búsqueda quedó registrada."}{" "}
+					Vuelve a esta página y busca por el nombre para seguir el estado.
 				</p>
 			</div>
 		);

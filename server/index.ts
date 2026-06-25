@@ -34,6 +34,12 @@ if (existsSync(distDir)) {
 
 const port = Number(process.env.PORT ?? 3000);
 
+if (!process.env.RESCUER_TOKEN) {
+	console.warn(
+		"⚠️  RESCUER_TOKEN no está definido: los rescatistas NO podrán cambiar estados (PATCH).",
+	);
+}
+
 // No bloquea el arranque: el server debe levantar aunque la DB tarde.
 void ensureSchema();
 

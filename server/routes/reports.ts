@@ -59,7 +59,8 @@ app.post("/", async (c) => {
 				r.lng != null &&
 				r.status !== "rescatado" &&
 				r.status !== "descartado" &&
-				haversineMeters(data.lat as number, data.lng as number, r.lat, r.lng) < 40,
+				// 25m: lo bastante cerca para ser el mismo punto, sin fusionar edificios contiguos.
+				haversineMeters(data.lat as number, data.lng as number, r.lat, r.lng) < 25,
 		);
 		if (near) {
 			return c.json({ report: toPublic(near, false), duplicate: true }, 200);

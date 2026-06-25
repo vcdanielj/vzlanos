@@ -40,12 +40,13 @@ app.post("/", async (c) => {
 			return c.json({ error: "No se encontró la dirección" }, 404);
 		}
 		const first = results[0];
+		const lat = Number(first.lat);
+		const lng = Number(first.lon);
+		if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+			return c.json({ error: "La dirección no devolvió coordenadas válidas" }, 404);
+		}
 		return c.json({
-			result: {
-				lat: Number(first.lat),
-				lng: Number(first.lon),
-				displayName: first.display_name,
-			},
+			result: { lat, lng, displayName: first.display_name },
 		});
 	} catch {
 		return c.json({ error: "No se pudo geocodificar la dirección" }, 502);

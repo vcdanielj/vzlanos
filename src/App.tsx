@@ -1,7 +1,7 @@
 import { Siren } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { flushQueue } from "./lib/api";
+import { flushQueue, pendingCount } from "./lib/api";
 import { Ayuda } from "./pages/Ayuda";
 import { Buscar } from "./pages/Buscar";
 import { Home } from "./pages/Home";
@@ -10,14 +10,23 @@ import { Reportar } from "./pages/Reportar";
 import { Sos } from "./pages/Sos";
 
 export const App = () => {
-	// Al recuperar conexión, reintentar los reportes encolados offline.
+	const [pending, setPending] = useState(pendingCount());
+
+	// Al recuperar conexión, reintentar los reportes encolados offline y refrescar
+	// el contador de pendientes (que se muestra como banner mientras haya cola).
 	useEffect(() => {
-		const onOnline = () => {
-			flushQueue();
+		const refresh = async () => {
+			await flushQueue();
+			setPending(pendingCount());
 		};
-		window.addEventListener("online", onOnline);
-		flushQueue();
-		return () => window.removeEventListener("online", onOnline);
+		const tick = () => setPending(pendingCount());
+		window.addEventListener("online", refresh);
+		refresh();
+		const id = setInterval(tick, 5000);
+		return () => {
+			window.removeEventListener("online", refresh);
+			clearInterval(id);
+		};
 	}, []);
 
 	return (
@@ -60,6 +69,12 @@ export const App = () => {
 						</div>
 					</div>
 				</header>
+				{pending > 0 && (
+					<div className="bg-amber-500 px-4 py-1.5 text-center text-xs font-medium text-white">
+						{pending} reporte{pending > 1 ? "s" : ""} pendiente
+						{pending > 1 ? "s" : ""} de enviar — se reintentará al volver la conexión.
+					</div>
+				)}
 				<main className="container flex w-full flex-1 flex-col py-6">
 					<Routes>
 						<Route path="/" element={<Home />} />
