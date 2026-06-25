@@ -34,6 +34,7 @@ export interface Report {
 	claimedBy: string | null;
 	// Reunificación (busqueda_persona)
 	personName: string | null;
+	cedula: string | null; // enmascarada en público; completa para rescatistas
 	hasPhoto: boolean;
 	lastKnownAddress: string | null;
 	relation: string | null;
@@ -56,6 +57,7 @@ export interface CreateReportInput {
 	foundAt?: string | null;
 	description?: string | null;
 	personName?: string | null;
+	cedula?: string | null; // cédula de la persona (validación, cruce exacto)
 	photo?: string | null; // base64 sin prefijo
 	photoMime?: string | null;
 	lastKnownAddress?: string | null;

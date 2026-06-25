@@ -32,6 +32,8 @@ export const reports = pgTable(
 		claimedBy: text("claimed_by"),
 		// Reunificación
 		personName: text("person_name"),
+		// Cédula de la persona (para validación y cruce exacto sin homónimos).
+		cedula: text("cedula"),
 		// Foto del desaparecido: base64 (sin prefijo) + mime. Se sirve por /photo, no en listas.
 		photo: text("photo"),
 		photoMime: text("photo_mime"),

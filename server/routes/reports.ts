@@ -15,6 +15,18 @@ import {
 
 const app = new Hono();
 
+// Normaliza la cédula a solo dígitos (para cruce exacto y consistente).
+const normCedula = (c: string | null | undefined): string | null => {
+	if (!c) return null;
+	const digits = c.replace(/\D/g, "");
+	return digits.length >= 5 ? digits : null;
+};
+// Enmascara para mostrar en público (privacidad): V-••••1234.
+const maskCedula = (c: string | null): string | null => {
+	if (!c) return null;
+	return c.length <= 4 ? "•••" : `••••${c.slice(-4)}`;
+};
+
 // Convierte una fila DB a la forma pública; oculta el contacto salvo rescatistas.
 const toPublic = (row: ReportRow, includeContact: boolean): Report => ({
 	id: row.id,
@@ -31,6 +43,8 @@ const toPublic = (row: ReportRow, includeContact: boolean): Report => ({
 	verified: row.verified,
 	claimedBy: row.claimedBy,
 	personName: row.personName,
+	// Cédula completa solo para rescatistas; enmascarada para el público.
+	cedula: includeContact ? row.cedula : maskCedula(row.cedula),
 	hasPhoto: !!(row.photo && row.photo.length > 0),
 	lastKnownAddress: row.lastKnownAddress,
 	relation: row.relation,
@@ -94,6 +108,7 @@ app.post("/", async (c) => {
 			foundAt: data.foundAt ?? null,
 			description: data.description ?? null,
 			personName: data.personName ?? null,
+			cedula: normCedula(data.cedula),
 			photo: data.photo ?? null,
 			photoMime: data.photoMime ?? null,
 			lastKnownAddress: data.lastKnownAddress ?? null,
@@ -111,21 +126,27 @@ app.post("/", async (c) => {
 	// mismo nombre y avisa por Web Push a quienes la buscaban.
 	const isSelfSafe = data.selfSafe && data.type === "busqueda_persona";
 	const isFound = data.type === "encontrado";
-	if ((isSelfSafe || isFound) && inserted.personName) {
-		const norm = inserted.personName.trim().toLowerCase();
+	if (isSelfSafe || isFound) {
 		const newStatus = isFound ? "encontrado" : "a_salvo";
-		const matches = await db
-			.select({ id: reports.id })
-			.from(reports)
-			.where(
-				and(
-					eq(reports.type, "busqueda_persona"),
-					inArray(reports.status, ["nuevo", "en_progreso"]),
-					sql`lower(trim(${reports.personName})) = ${norm}`,
-				),
-			);
-		// Tope anti-homónimo: si hay demasiados, es ambiguo → no propagar automáticamente.
-		if (matches.length > 0 && matches.length <= 5) {
+		const open = inArray(reports.status, ["nuevo", "en_progreso"]);
+		let matches: { id: number }[] = [];
+		let byCedula = false;
+		if (inserted.cedula) {
+			// Match exacto por cédula: único, sin riesgo de homónimos.
+			matches = await db
+				.select({ id: reports.id })
+				.from(reports)
+				.where(and(eq(reports.type, "busqueda_persona"), open, eq(reports.cedula, inserted.cedula)));
+			byCedula = true;
+		} else if (inserted.personName) {
+			const norm = inserted.personName.trim().toLowerCase();
+			matches = await db
+				.select({ id: reports.id })
+				.from(reports)
+				.where(and(eq(reports.type, "busqueda_persona"), open, sql`lower(trim(${reports.personName})) = ${norm}`));
+		}
+		// Cédula = exacto (sin tope). Nombre = tope anti-homónimo (≤5).
+		if (matches.length > 0 && (byCedula || matches.length <= 5)) {
 			await db
 				.update(reports)
 				.set({ status: newStatus, updatedAt: new Date() })
