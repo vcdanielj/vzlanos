@@ -1,4 +1,5 @@
 import {
+	Activity,
 	HandHeart,
 	HeartHandshake,
 	LifeBuoy,
@@ -42,6 +43,13 @@ const actions = [
 		title: "Encontré a una persona",
 		desc: "Hospitales, iglesias o albergues: registra a quien recibiste, con foto.",
 		tone: "bg-vzla-blue text-white",
+	},
+	{
+		to: "/temblores",
+		icon: Activity,
+		title: "Temblores recientes",
+		desc: "Consulta los sismos reportados en Venezuela en tiempo casi real.",
+		tone: "bg-vzla-red text-white",
 	},
 	{
 		to: "/acopio",

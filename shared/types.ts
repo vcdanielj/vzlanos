@@ -87,6 +87,23 @@ export interface ChatMessage {
 	createdAt: string;
 }
 
+export interface EarthquakeEvent {
+	id: string;
+	title: string;
+	place: string;
+	magnitude: number | null;
+	depthKm: number | null;
+	lat: number;
+	lng: number;
+	time: string;
+	updatedAt: string;
+	significance: number | null;
+	feltReports: number | null;
+	tsunami: boolean;
+	source: string | null;
+	url: string;
+}
+
 export const STATUS_LABELS: Record<ReportStatus, string> = {
 	nuevo: "Nuevo",
 	en_progreso: "En progreso",

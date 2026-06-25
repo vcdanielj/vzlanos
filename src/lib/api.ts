@@ -1,6 +1,7 @@
 import type {
 	ChatMessage,
 	CreateReportInput,
+	EarthquakeEvent,
 	GeocodeResult,
 	Prayer,
 	Report,
@@ -215,4 +216,21 @@ export const geocode = async (address: string): Promise<GeocodeResult> => {
 	}
 	const data = await res.json();
 	return data.result as GeocodeResult;
+};
+
+export const listEarthquakes = async (params?: {
+	hours?: number;
+	limit?: number;
+}): Promise<EarthquakeEvent[]> => {
+	const qs = new URLSearchParams();
+	if (params?.hours != null) qs.set("hours", String(params.hours));
+	if (params?.limit != null) qs.set("limit", String(params.limit));
+	const suffix = qs.toString();
+	const res = await fetch(`/api/earthquakes${suffix ? `?${suffix}` : ""}`);
+	if (!res.ok) {
+		const body = await res.json().catch(() => ({}));
+		throw new Error(body.error ?? "No se pudo cargar el listado de temblores");
+	}
+	const data = await res.json();
+	return data.earthquakes as EarthquakeEvent[];
 };
