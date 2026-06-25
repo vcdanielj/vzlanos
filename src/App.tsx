@@ -12,6 +12,7 @@ import { flushQueue, pendingCount } from "./lib/api";
 import { Ayuda } from "./pages/Ayuda";
 import { Buscar } from "./pages/Buscar";
 import { CentrosAcopio } from "./pages/CentrosAcopio";
+import { Chat } from "./pages/Chat";
 import { Compartir } from "./pages/Compartir";
 import { EncontrarPersona } from "./pages/EncontrarPersona";
 import { Home } from "./pages/Home";
@@ -109,6 +110,7 @@ export const App = () => {
 						<Route path="/buscar" element={<Buscar />} />
 						<Route path="/encontrar" element={<EncontrarPersona />} />
 						<Route path="/oracion" element={<Oracion />} />
+						<Route path="/chat" element={<Chat />} />
 						<Route path="/acopio" element={<CentrosAcopio />} />
 						<Route path="/ayuda" element={<Ayuda />} />
 						<Route path="/mapa" element={<Mapa />} />
@@ -137,6 +139,9 @@ export const App = () => {
 							</Link>
 							<Link to="/oracion" className="hover:text-foreground">
 								Oración
+							</Link>
+							<Link to="/chat" className="hover:text-foreground">
+								Chat
 							</Link>
 							<Link to="/acopio" className="hover:text-foreground">
 								Acopio

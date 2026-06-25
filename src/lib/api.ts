@@ -1,4 +1,5 @@
 import type {
+	ChatMessage,
 	CreateReportInput,
 	GeocodeResult,
 	Prayer,
@@ -163,6 +164,43 @@ export const prayFor = async (id: number): Promise<Prayer> => {
 	if (!res.ok) throw new Error("No se pudo registrar");
 	const data = await res.json();
 	return data.prayer as Prayer;
+};
+
+// --- Chat en vivo ---
+export const listChat = async (): Promise<ChatMessage[]> => {
+	const res = await fetch("/api/chat");
+	if (!res.ok) throw new Error("No se pudo cargar el chat");
+	const data = await res.json();
+	return data.messages as ChatMessage[];
+};
+
+export const sendChat = async (input: {
+	name?: string | null;
+	text: string;
+}): Promise<ChatMessage> => {
+	const res = await fetch("/api/chat", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(input),
+	});
+	if (!res.ok) {
+		const body = await res.json().catch(() => ({}));
+		throw new Error(body.error ?? "No se pudo enviar");
+	}
+	const data = await res.json();
+	return data.message as ChatMessage;
+};
+
+export const openChatStream = (onMsg: (m: ChatMessage) => void): (() => void) => {
+	const es = new EventSource("/api/chat/stream");
+	es.addEventListener("chat", (e) => {
+		try {
+			onMsg(JSON.parse((e as MessageEvent).data) as ChatMessage);
+		} catch {
+			/* malformado */
+		}
+	});
+	return () => es.close();
 };
 
 export const geocode = async (address: string): Promise<GeocodeResult> => {

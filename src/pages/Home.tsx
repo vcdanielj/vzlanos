@@ -3,6 +3,7 @@ import {
 	HeartHandshake,
 	LifeBuoy,
 	MapPin,
+	MessageCircle,
 	Package,
 	PhoneCall,
 	Search,
@@ -62,6 +63,13 @@ const actions = [
 		title: "Sala de oración",
 		desc: "Comparte tu petición y ora junto a la comunidad por Venezuela.",
 		tone: "bg-vzla-red text-white",
+	},
+	{
+		to: "/chat",
+		icon: MessageCircle,
+		title: "Chat en vivo",
+		desc: "Conversa y anímense en tiempo real con la comunidad venezolana.",
+		tone: "bg-vzla-yellow text-vzla-blue",
 	},
 ];
 
