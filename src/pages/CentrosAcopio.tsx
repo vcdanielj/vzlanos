@@ -83,6 +83,35 @@ const CENTERS: { region: string; items: Center[] }[] = [
 			{ name: "Núcleo Táchira (ULA)", address: "Universidad de Los Andes", org: "ULA" },
 		],
 	},
+	{
+		region: "Bolívar",
+		items: [
+			{
+				name: "Esquina de Banesco",
+				address: "Avenida República, municipio Angostura del Orinoco",
+				org: "Voluntad Popular",
+			},
+		],
+	},
+	{
+		region: "Carabobo",
+		items: [
+			{
+				name: "Edificio Talislandia",
+				address: "Mezzanina, avenida Monseñor Adams, El Viñedo",
+				org: "Comando ConVzla y Operación Todos con Venezuela",
+			},
+		],
+	},
+	{
+		region: "Lara",
+		items: [
+			{
+				name: "Tatas Food",
+				address: "Carrera 15 entre calles 13A y 13B, Barquisimeto",
+			},
+		],
+	},
 ];
 
 const mapsUrl = (c: Center, region: string) =>
