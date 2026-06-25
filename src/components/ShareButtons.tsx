@@ -6,7 +6,6 @@ import {
 	MessageCircle,
 	Music2,
 	Send,
-	Share2,
 } from "lucide-react";
 import { useState } from "react";
 
