@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { Prayer } from "../../shared/types.ts";
 import { db } from "../db/client.ts";
 import { type PrayerRow, prayers } from "../db/schema.ts";
+import { moderate } from "../lib/moderation.ts";
 import { rateLimit } from "../lib/ratelimit.ts";
 
 const app = new Hono();
@@ -45,6 +46,11 @@ app.post("/", async (c) => {
 	const parsed = createSchema.safeParse(body);
 	if (!parsed.success) {
 		return c.json({ error: "Escribe tu mensaje (mín. 3 caracteres)." }, 400);
+	}
+	// Moderación (gratis, palabras clave) antes de publicar en el muro público.
+	const mod = moderate(parsed.data.text);
+	if (!mod.ok) {
+		return c.json({ error: mod.reason ?? "Tu mensaje no cumple las normas de la sala." }, 400);
 	}
 	const [row] = await db
 		.insert(prayers)
