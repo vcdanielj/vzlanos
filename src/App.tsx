@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react";
+import { Activity, MapPin } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
 	Link,
@@ -18,6 +18,7 @@ import { Home } from "./pages/Home";
 import { Mapa } from "./pages/Mapa";
 import { Oracion } from "./pages/Oracion";
 import { Reportar } from "./pages/Reportar";
+import { Temblores } from "./pages/Temblores";
 
 export const App = () => {
 	const [pending, setPending] = useState(pendingCount());
@@ -78,6 +79,12 @@ export const App = () => {
 								>
 									Mapa
 								</Link>
+								<Link
+									to="/temblores"
+									className="text-muted-foreground transition-colors hover:text-foreground"
+								>
+									<Activity className="hidden h-3.5 w-3.5 md:inline" /> Temblores
+								</Link>
 							</nav>
 							<Link
 								to="/reportar"
@@ -112,6 +119,7 @@ export const App = () => {
 						<Route path="/acopio" element={<CentrosAcopio />} />
 						<Route path="/ayuda" element={<Ayuda />} />
 						<Route path="/mapa" element={<Mapa />} />
+						<Route path="/temblores" element={<Temblores />} />
 					</Routes>
 				</main>
 				<footer className="safe-bottom mt-8 border-t bg-slate-50">
@@ -134,6 +142,9 @@ export const App = () => {
 							</Link>
 							<Link to="/mapa" className="hover:text-foreground">
 								Mapa
+							</Link>
+							<Link to="/temblores" className="hover:text-foreground">
+								Temblores
 							</Link>
 							<Link to="/oracion" className="hover:text-foreground">
 								Oración
