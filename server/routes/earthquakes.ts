@@ -40,6 +40,15 @@ interface UsgsFeature {
 	};
 }
 
+interface EarthquakeResponse {
+	earthquakes: EarthquakeEvent[];
+	source: "USGS";
+	updatedAt: string;
+}
+
+const CACHE_TTL_MS = 60_000;
+const responseCache = new Map<string, { expiresAt: number; payload: EarthquakeResponse }>();
+
 const clientIp = (h: { header: (k: string) => string | undefined }) =>
 	h.header("x-forwarded-for")?.split(",")[0]?.trim() ?? h.header("x-real-ip") ?? "unknown";
 
@@ -92,6 +101,13 @@ app.get("/", async (c) => {
 	}
 
 	const { hours, limit } = parsed.data;
+	const cacheKey = `${hours}:${limit}`;
+	const cached = responseCache.get(cacheKey);
+	if (cached && cached.expiresAt > Date.now()) {
+		c.header("Cache-Control", "public, max-age=60");
+		return c.json(cached.payload);
+	}
+
 	const startTime = new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 	const url = new URL("https://earthquake.usgs.gov/fdsnws/event/1/query");
 	url.searchParams.set("format", "geojson");
@@ -117,11 +133,14 @@ app.get("/", async (c) => {
 
 		const data = (await res.json()) as UsgsFeatureCollection;
 		const earthquakes = (data.features ?? []).map(toEvent).filter(Boolean);
-		return c.json({
+		const payload: EarthquakeResponse = {
 			earthquakes,
 			source: "USGS",
 			updatedAt: new Date().toISOString(),
-		});
+		};
+		responseCache.set(cacheKey, { expiresAt: Date.now() + CACHE_TTL_MS, payload });
+		c.header("Cache-Control", "public, max-age=60");
+		return c.json(payload);
 	} catch {
 		return c.json({ error: "No se pudo consultar el listado de temblores" }, 502);
 	}
