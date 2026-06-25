@@ -66,6 +66,16 @@ const createSchema = async () => {
 			)
 		`;
 		await sql`CREATE INDEX IF NOT EXISTS prayers_created_idx ON prayers (created_at)`;
+		await sql`
+			CREATE TABLE IF NOT EXISTS chat_messages (
+				id serial PRIMARY KEY,
+				name text,
+				text text NOT NULL,
+				hidden boolean NOT NULL DEFAULT false,
+				created_at timestamptz NOT NULL DEFAULT now()
+			)
+		`;
+		await sql`CREATE INDEX IF NOT EXISTS chat_created_idx ON chat_messages (created_at)`;
 	} finally {
 		await sql.end();
 	}

@@ -80,6 +80,13 @@ export interface Prayer {
 	createdAt: string;
 }
 
+export interface ChatMessage {
+	id: number;
+	name: string | null;
+	text: string;
+	createdAt: string;
+}
+
 export const STATUS_LABELS: Record<ReportStatus, string> = {
 	nuevo: "Nuevo",
 	en_progreso: "En progreso",

@@ -102,3 +102,22 @@ export const prayers = pgTable(
 );
 
 export type PrayerRow = typeof prayers.$inferSelect;
+
+// Chat en vivo comunitario (conversacional, tiempo real por SSE).
+export const chatMessages = pgTable(
+	"chat_messages",
+	{
+		id: serial("id").primaryKey(),
+		name: text("name"),
+		text: text("text").notNull(),
+		hidden: boolean("hidden").notNull().default(false),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.default(sql`now()`),
+	},
+	(t) => ({
+		createdIdx: index("chat_created_idx").on(t.createdAt),
+	}),
+);
+
+export type ChatRow = typeof chatMessages.$inferSelect;
