@@ -39,21 +39,21 @@ const actions = [
 		icon: HeartHandshake,
 		title: "Encontré a una persona",
 		desc: "Hospitales, iglesias o albergues: registra a quien recibiste, con foto.",
-		tone: "bg-teal-600 text-white",
+		tone: "bg-vzla-yellow text-vzla-blue",
 	},
 	{
 		to: "/ayuda",
 		icon: PhoneCall,
 		title: "¿A quién contacto?",
 		desc: "Líneas de emergencia, Cruz Roja, Protección Civil.",
-		tone: "bg-emerald-600 text-white",
+		tone: "bg-vzla-red text-white",
 	},
 	{
 		to: "/oracion",
 		icon: HandHeart,
 		title: "Sala de oración",
 		desc: "Comparte tu petición y ora junto a la comunidad por Venezuela.",
-		tone: "bg-violet-600 text-white",
+		tone: "bg-vzla-blue text-white",
 	},
 ];
 

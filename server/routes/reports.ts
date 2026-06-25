@@ -175,10 +175,12 @@ app.get("/search", async (c) => {
 	if (!parsed.success) {
 		return c.json({ error: "Falta el nombre a buscar" }, 400);
 	}
+	// Escapa comodines LIKE (% _ \) para que un nombre no ensucie la búsqueda.
+	const safe = parsed.data.name.replace(/[\\%_]/g, "\\$&");
 	const rows = await db
 		.select()
 		.from(reports)
-		.where(ilike(reports.personName, `%${parsed.data.name}%`))
+		.where(ilike(reports.personName, `%${safe}%`))
 		.orderBy(desc(reports.updatedAt))
 		.limit(100);
 	return c.json({ reports: rows.map((r) => toPublic(r, false)) });
@@ -229,7 +231,9 @@ app.patch("/:id", async (c) => {
 
 	// Al marcar a salvo / rescatado, avisa por Web Push a quienes la buscaban.
 	if (
-		(updated.status === "a_salvo" || updated.status === "rescatado") &&
+		(updated.status === "a_salvo" ||
+			updated.status === "rescatado" ||
+			updated.status === "encontrado") &&
 		updated.personName
 	) {
 		void notifyPersonSafe(updated.personName, updated.status);

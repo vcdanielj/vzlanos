@@ -45,10 +45,7 @@ export const VersesBanner = () => {
 	}, []);
 	const v = VERSES[i];
 	return (
-		<div
-			className="rounded-xl border border-vzla-blue/15 bg-vzla-blue/5 px-4 py-3"
-			aria-live="polite"
-		>
+		<div className="rounded-xl border border-vzla-blue/15 bg-vzla-blue/5 px-4 py-3">
 			<div className="flex items-start gap-2.5">
 				<BookOpenText className="mt-0.5 h-4 w-4 shrink-0 text-vzla-blue" />
 				<p className="text-sm italic text-foreground/80">

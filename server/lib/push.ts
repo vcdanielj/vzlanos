@@ -24,6 +24,8 @@ export interface BrowserSub {
 }
 
 export const saveSubscription = async (sub: BrowserSub, personName: string) => {
+	// Unicidad por (endpoint, persona): un mismo navegador puede vigilar a VARIOS
+	// familiares sin sobrescribir las suscripciones anteriores.
 	await db
 		.insert(pushSubs)
 		.values({
@@ -32,10 +34,7 @@ export const saveSubscription = async (sub: BrowserSub, personName: string) => {
 			auth: sub.keys.auth,
 			personName: norm(personName),
 		})
-		.onConflictDoUpdate({
-			target: pushSubs.endpoint,
-			set: { personName: norm(personName) },
-		});
+		.onConflictDoNothing();
 };
 
 // Notifica a quienes pidieron aviso por esta persona (match exacto normalizado).

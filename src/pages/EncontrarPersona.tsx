@@ -42,7 +42,7 @@ export const EncontrarPersona = () => {
 		navigator.geolocation.getCurrentPosition(
 			(pos) => setPin({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
 			() => setError("No se pudo obtener la ubicación. Toca el mapa para marcarla."),
-			{ enableHighAccuracy: true, timeout: 15000 },
+			{ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
 		);
 	};
 

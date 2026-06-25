@@ -8,6 +8,7 @@ import {
 	serial,
 	text,
 	timestamp,
+	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const reports = pgTable(
@@ -61,7 +62,7 @@ export const pushSubs = pgTable(
 	"push_subs",
 	{
 		id: serial("id").primaryKey(),
-		endpoint: text("endpoint").notNull().unique(),
+		endpoint: text("endpoint").notNull(),
 		p256dh: text("p256dh").notNull(),
 		auth: text("auth").notNull(),
 		// Nombre (normalizado, minúsculas) de la persona por la que quieren aviso.
@@ -72,6 +73,11 @@ export const pushSubs = pgTable(
 	},
 	(t) => ({
 		nameIdx: index("push_subs_name_idx").on(t.personName),
+		// Una suscripción por (navegador, persona): permite vigilar varias personas.
+		endpointPersonIdx: uniqueIndex("push_subs_endpoint_person_idx").on(
+			t.endpoint,
+			t.personName,
+		),
 	}),
 );
 

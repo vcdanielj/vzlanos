@@ -43,7 +43,7 @@ const createSchema = async () => {
 		await sql`
 			CREATE TABLE IF NOT EXISTS push_subs (
 				id serial PRIMARY KEY,
-				endpoint text NOT NULL UNIQUE,
+				endpoint text NOT NULL,
 				p256dh text NOT NULL,
 				auth text NOT NULL,
 				person_name text NOT NULL,
@@ -51,6 +51,10 @@ const createSchema = async () => {
 			)
 		`;
 		await sql`CREATE INDEX IF NOT EXISTS push_subs_name_idx ON push_subs (person_name)`;
+		// Migración: pasar de UNIQUE(endpoint) a UNIQUE(endpoint, person_name) para
+		// que un navegador pueda vigilar a varias personas.
+		await sql`ALTER TABLE push_subs DROP CONSTRAINT IF EXISTS push_subs_endpoint_key`;
+		await sql`CREATE UNIQUE INDEX IF NOT EXISTS push_subs_endpoint_person_idx ON push_subs (endpoint, person_name)`;
 		await sql`
 			CREATE TABLE IF NOT EXISTS prayers (
 				id serial PRIMARY KEY,

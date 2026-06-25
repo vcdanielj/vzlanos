@@ -32,7 +32,7 @@ export const Reportar = () => {
 				setAccuracy(pos.coords.accuracy);
 			},
 			() => setError("No se pudo obtener tu ubicación. Toca el mapa para marcar el punto."),
-			{ enableHighAccuracy: true, timeout: 15000 },
+			{ enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },
 		);
 	};
 
@@ -129,6 +129,7 @@ export const Reportar = () => {
 									setFloor("");
 									setInjured(false);
 									setDescription("");
+									setContact("");
 								}}
 							>
 								Otro reporte
