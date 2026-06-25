@@ -76,3 +76,23 @@ export const pushSubs = pgTable(
 );
 
 export type PushSubRow = typeof pushSubs.$inferSelect;
+
+// Sala de oración: peticiones y palabras de aliento de la comunidad.
+export const prayers = pgTable(
+	"prayers",
+	{
+		id: serial("id").primaryKey(),
+		name: text("name"),
+		text: text("text").notNull(),
+		prayCount: integer("pray_count").notNull().default(0),
+		hidden: boolean("hidden").notNull().default(false),
+		createdAt: timestamp("created_at", { withTimezone: true })
+			.notNull()
+			.default(sql`now()`),
+	},
+	(t) => ({
+		createdIdx: index("prayers_created_idx").on(t.createdAt),
+	}),
+);
+
+export type PrayerRow = typeof prayers.$inferSelect;

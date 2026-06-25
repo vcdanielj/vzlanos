@@ -1,0 +1,73 @@
+import { desc, eq, sql } from "drizzle-orm";
+import { Hono } from "hono";
+import { z } from "zod";
+import type { Prayer } from "../../shared/types.ts";
+import { db } from "../db/client.ts";
+import { type PrayerRow, prayers } from "../db/schema.ts";
+import { rateLimit } from "../lib/ratelimit.ts";
+
+const app = new Hono();
+
+const toPublic = (r: PrayerRow): Prayer => ({
+	id: r.id,
+	name: r.name,
+	text: r.text,
+	prayCount: r.prayCount,
+	createdAt: r.createdAt.toISOString(),
+});
+
+const createSchema = z.object({
+	name: z.string().trim().max(80).optional().nullable(),
+	text: z.string().trim().min(3).max(1000),
+});
+
+const clientIp = (h: { header: (k: string) => string | undefined }) =>
+	h.header("x-forwarded-for")?.split(",")[0]?.trim() ?? h.header("x-real-ip") ?? "unknown";
+
+// GET /api/prayers — feed reciente (no ocultas).
+app.get("/", async (c) => {
+	const rows = await db
+		.select()
+		.from(prayers)
+		.where(eq(prayers.hidden, false))
+		.orderBy(desc(prayers.createdAt))
+		.limit(100);
+	return c.json({ prayers: rows.map(toPublic) });
+});
+
+// POST /api/prayers — publicar una petición o palabra de aliento.
+app.post("/", async (c) => {
+	const ip = clientIp(c.req);
+	if (!rateLimit(`prayer:${ip}`, 8, 60_000)) {
+		return c.json({ error: "Espera un momento antes de publicar de nuevo." }, 429);
+	}
+	const body = await c.req.json().catch(() => null);
+	const parsed = createSchema.safeParse(body);
+	if (!parsed.success) {
+		return c.json({ error: "Escribe tu mensaje (mín. 3 caracteres)." }, 400);
+	}
+	const [row] = await db
+		.insert(prayers)
+		.values({ name: parsed.data.name?.trim() || null, text: parsed.data.text })
+		.returning();
+	return c.json({ prayer: toPublic(row) }, 201);
+});
+
+// POST /api/prayers/:id/pray — sumar un 🙏.
+app.post("/:id/pray", async (c) => {
+	const ip = clientIp(c.req);
+	if (!rateLimit(`pray:${ip}`, 60, 60_000)) {
+		return c.json({ error: "Demasiadas acciones." }, 429);
+	}
+	const id = Number(c.req.param("id"));
+	if (!Number.isInteger(id)) return c.json({ error: "id inválido" }, 400);
+	const [row] = await db
+		.update(prayers)
+		.set({ prayCount: sql`${prayers.prayCount} + 1` })
+		.where(eq(prayers.id, id))
+		.returning();
+	if (!row) return c.json({ error: "No encontrado" }, 404);
+	return c.json({ prayer: toPublic(row) });
+});
+
+export default app;

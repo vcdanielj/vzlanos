@@ -1,4 +1,12 @@
-import { HeartHandshake, LifeBuoy, MapPin, PhoneCall, Search, Share2 } from "lucide-react";
+import {
+	HandHeart,
+	HeartHandshake,
+	LifeBuoy,
+	MapPin,
+	PhoneCall,
+	Search,
+	Share2,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { VersesBanner } from "@/components/VersesBanner";
@@ -39,6 +47,13 @@ const actions = [
 		title: "¿A quién contacto?",
 		desc: "Líneas de emergencia, Cruz Roja, Protección Civil.",
 		tone: "bg-emerald-600 text-white",
+	},
+	{
+		to: "/oracion",
+		icon: HandHeart,
+		title: "Sala de oración",
+		desc: "Comparte tu petición y ora junto a la comunidad por Venezuela.",
+		tone: "bg-violet-600 text-white",
 	},
 ];
 

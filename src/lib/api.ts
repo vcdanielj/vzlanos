@@ -1,6 +1,7 @@
 import type {
 	CreateReportInput,
 	GeocodeResult,
+	Prayer,
 	Report,
 } from "@shared/types";
 
@@ -117,6 +118,38 @@ export const updateReport = async (
 	if (!res.ok) throw new Error("No se pudo actualizar");
 	const data = await res.json();
 	return data.report as Report;
+};
+
+// --- Sala de oración ---
+export const listPrayers = async (): Promise<Prayer[]> => {
+	const res = await fetch("/api/prayers");
+	if (!res.ok) throw new Error("No se pudo cargar la sala de oración");
+	const data = await res.json();
+	return data.prayers as Prayer[];
+};
+
+export const createPrayer = async (input: {
+	name?: string | null;
+	text: string;
+}): Promise<Prayer> => {
+	const res = await fetch("/api/prayers", {
+		method: "POST",
+		headers: { "Content-Type": "application/json" },
+		body: JSON.stringify(input),
+	});
+	if (!res.ok) {
+		const body = await res.json().catch(() => ({}));
+		throw new Error(body.error ?? "No se pudo publicar");
+	}
+	const data = await res.json();
+	return data.prayer as Prayer;
+};
+
+export const prayFor = async (id: number): Promise<Prayer> => {
+	const res = await fetch(`/api/prayers/${id}/pray`, { method: "POST" });
+	if (!res.ok) throw new Error("No se pudo registrar");
+	const data = await res.json();
+	return data.prayer as Prayer;
 };
 
 export const geocode = async (address: string): Promise<GeocodeResult> => {

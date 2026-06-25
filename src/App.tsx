@@ -15,6 +15,7 @@ import { Compartir } from "./pages/Compartir";
 import { EncontrarPersona } from "./pages/EncontrarPersona";
 import { Home } from "./pages/Home";
 import { Mapa } from "./pages/Mapa";
+import { Oracion } from "./pages/Oracion";
 import { Reportar } from "./pages/Reportar";
 
 export const App = () => {
@@ -106,6 +107,7 @@ export const App = () => {
 						<Route path="/compartir" element={<Compartir />} />
 						<Route path="/buscar" element={<Buscar />} />
 						<Route path="/encontrar" element={<EncontrarPersona />} />
+						<Route path="/oracion" element={<Oracion />} />
 						<Route path="/ayuda" element={<Ayuda />} />
 						<Route path="/mapa" element={<Mapa />} />
 					</Routes>

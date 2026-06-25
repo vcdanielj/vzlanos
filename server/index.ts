@@ -7,6 +7,7 @@ import { logger } from "hono/logger";
 import { ensureSchema } from "./db/ensure-schema.ts";
 import geocodeRoutes from "./routes/geocode.ts";
 import pfifRoutes from "./routes/pfif.ts";
+import prayerRoutes from "./routes/prayers.ts";
 import pushRoutes from "./routes/push.ts";
 import reportRoutes from "./routes/reports.ts";
 
@@ -17,6 +18,7 @@ app.get("/api/health", (c) => c.json({ ok: true }));
 app.route("/api/reports", reportRoutes);
 app.route("/api/geocode", geocodeRoutes);
 app.route("/api/push", pushRoutes);
+app.route("/api/prayers", prayerRoutes);
 app.route("/export", pfifRoutes);
 
 // En producción servimos el build de Vite (dist). Primero los archivos reales
