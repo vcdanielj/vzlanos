@@ -1,5 +1,6 @@
 import { LifeBuoy, MapPin, PhoneCall, Search, Share2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { InstallPrompt } from "@/components/InstallPrompt";
 import { VersesBanner } from "@/components/VersesBanner";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -69,5 +70,7 @@ export const Home = () => (
 				</Link>
 			))}
 		</div>
+
+		<InstallPrompt />
 	</div>
 );
