@@ -25,6 +25,7 @@ const statusVariant = (
 
 const ReportarDesaparecido = () => {
 	const [name, setName] = useState("");
+	const [cedula, setCedula] = useState("");
 	const [address, setAddress] = useState("");
 	const [relation, setRelation] = useState("");
 	const [reporterName, setReporterName] = useState("");
@@ -75,6 +76,7 @@ const ReportarDesaparecido = () => {
 			await createReport({
 				type: "busqueda_persona",
 				personName: name.trim(),
+				cedula: cedula.trim() || null,
 				photo: photo?.base64 ?? null,
 				photoMime: photo?.mime ?? null,
 				lastKnownAddress: address.trim() || null,
@@ -117,6 +119,20 @@ const ReportarDesaparecido = () => {
 			<div className="space-y-2">
 				<Label htmlFor="name">Nombre completo de la persona *</Label>
 				<Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
+			</div>
+
+			<div className="space-y-2">
+				<Label htmlFor="dp-ced">Cédula (si la sabes)</Label>
+				<Input
+					id="dp-ced"
+					inputMode="numeric"
+					placeholder="V-12345678"
+					value={cedula}
+					onChange={(e) => setCedula(e.target.value)}
+				/>
+				<p className="text-xs text-muted-foreground">
+					Con la cédula, si la persona se reporta a salvo, tu búsqueda se actualiza sola.
+				</p>
 			</div>
 
 			<div className="space-y-2">
@@ -267,7 +283,17 @@ const SeguirEstado = () => {
 								/>
 							)}
 							<div className="flex-1">
-								<div className="font-semibold">{r.personName}</div>
+								<div className="flex flex-wrap items-center gap-1.5">
+									<span className="font-semibold">{r.personName}</span>
+									{(r.hasPhoto || r.cedula) && (
+										<span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-medium text-emerald-700">
+											✓ Con evidencia
+										</span>
+									)}
+								</div>
+								{r.cedula && (
+									<div className="text-xs text-muted-foreground">Cédula: {r.cedula}</div>
+								)}
 								{r.foundAt && (
 									<div className="text-xs font-medium text-teal-700">
 										✓ Encontrada en {r.foundAt}
@@ -298,13 +324,32 @@ const SeguirEstado = () => {
 const MarcarASalvo = () => {
 	const [name, setName] = useState("");
 	const [note, setNote] = useState("");
+	const [cedula, setCedula] = useState("");
+	const [photo, setPhoto] = useState<{ base64: string; mime: string } | null>(null);
+	const [photoPreview, setPhotoPreview] = useState("");
 	const [submitting, setSubmitting] = useState(false);
 	const [done, setDone] = useState(false);
 	const [error, setError] = useState("");
 
+	const onPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+		try {
+			const r = await fileToResizedBase64(file);
+			setPhoto(r);
+			setPhotoPreview(`data:${r.mime};base64,${r.base64}`);
+		} catch {
+			setError("No se pudo procesar la foto.");
+		}
+	};
+
 	const submit = async () => {
 		if (!name.trim()) {
 			setError("Escribe tu nombre.");
+			return;
+		}
+		if (!cedula.trim() && !photo) {
+			setError("Agrega tu cédula o una foto para validar que eres tú.");
 			return;
 		}
 		setError("");
@@ -313,6 +358,9 @@ const MarcarASalvo = () => {
 			await createReport({
 				type: "busqueda_persona",
 				personName: name.trim(),
+				cedula: cedula.trim() || null,
+				photo: photo?.base64 ?? null,
+				photoMime: photo?.mime ?? null,
 				description: note.trim() || "Se reportó a salvo.",
 				selfSafe: true,
 			});
@@ -339,11 +387,48 @@ const MarcarASalvo = () => {
 	return (
 		<div className="space-y-3">
 			<p className="text-sm text-muted-foreground">
-				Si estás bien, repórtalo para que tu familia deje de buscarte.
+				Si estás bien, repórtalo para que tu familia deje de buscarte. Agrega tu cédula o una
+				foto para que sepan que de verdad eres tú.
 			</p>
 			<div className="space-y-2">
 				<Label htmlFor="safe-name">Tu nombre completo *</Label>
 				<Input id="safe-name" value={name} onChange={(e) => setName(e.target.value)} />
+			</div>
+			<div className="space-y-2">
+				<Label htmlFor="safe-ced">Cédula (para validar)</Label>
+				<Input
+					id="safe-ced"
+					inputMode="numeric"
+					placeholder="V-12345678"
+					value={cedula}
+					onChange={(e) => setCedula(e.target.value)}
+				/>
+			</div>
+			<div className="space-y-2">
+				<Label>Foto tuya (evidencia)</Label>
+				<div className="flex items-center gap-3">
+					{photoPreview ? (
+						<img
+							src={photoPreview}
+							alt="Foto"
+							className="h-20 w-20 rounded-lg border object-cover"
+						/>
+					) : (
+						<div className="flex h-20 w-20 items-center justify-center rounded-lg border bg-muted text-muted-foreground">
+							<Camera className="h-6 w-6" />
+						</div>
+					)}
+					<label className="cursor-pointer rounded-md border px-3 py-2 text-sm hover:bg-accent">
+						{photoPreview ? "Cambiar foto" : "Tomar / subir foto"}
+						<input
+							type="file"
+							accept="image/*"
+							capture="user"
+							className="hidden"
+							onChange={onPhoto}
+						/>
+					</label>
+				</div>
 			</div>
 			<div className="space-y-2">
 				<Label htmlFor="safe-note">Mensaje (opcional)</Label>

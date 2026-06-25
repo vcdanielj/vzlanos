@@ -222,6 +222,9 @@ export const Mapa = () => {
 										</Badge>
 									</div>
 								</div>
+								{r.cedula && (
+									<p className="text-xs text-muted-foreground">🪪 Cédula: {r.cedula}</p>
+								)}
 								{(r.injured || r.floor) && (
 									<div className="flex flex-wrap gap-1.5">
 										{r.injured && <Badge variant="destructive">Hay heridos</Badge>}

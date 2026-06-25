@@ -14,6 +14,7 @@ const PLACES = ["Hospital", "Iglesia", "Albergue", "En la calle", "Otro"];
 
 export const EncontrarPersona = () => {
 	const [name, setName] = useState("");
+	const [cedula, setCedula] = useState("");
 	const [foundAt, setFoundAt] = useState("Hospital");
 	const [placeName, setPlaceName] = useState("");
 	const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
@@ -54,6 +55,7 @@ export const EncontrarPersona = () => {
 			await createReport({
 				type: "encontrado",
 				personName: name.trim() || "No identificada",
+				cedula: cedula.trim() || null,
 				foundAt: place,
 				photo: photo?.base64 ?? null,
 				photoMime: photo?.mime ?? null,
@@ -111,6 +113,17 @@ export const EncontrarPersona = () => {
 							placeholder="Déjalo vacío si no la han identificado"
 							value={name}
 							onChange={(e) => setName(e.target.value)}
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="enc-ced">Cédula (si la sabes)</Label>
+						<Input
+							id="enc-ced"
+							inputMode="numeric"
+							placeholder="V-12345678"
+							value={cedula}
+							onChange={(e) => setCedula(e.target.value)}
 						/>
 					</div>
 
