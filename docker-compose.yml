@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: emergencia
+      POSTGRES_PASSWORD: emergencia
+      POSTGRES_DB: emergencia
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgres://emergencia:emergencia@db:5432/emergencia
+      RESCUER_TOKEN: cambia-esto-en-produccion
+      PORT: "3000"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

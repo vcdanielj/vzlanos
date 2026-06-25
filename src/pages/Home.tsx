@@ -1,0 +1,69 @@
+import { LifeBuoy, MapPin, PhoneCall, Search, Siren } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Card, CardContent } from "@/components/ui/card";
+
+const actions = [
+	{
+		to: "/sos",
+		icon: Siren,
+		title: "Estoy atrapado (SOS)",
+		desc: "Envía tu ubicación ahora para que te rescaten.",
+		tone: "bg-destructive text-destructive-foreground",
+	},
+	{
+		to: "/reportar",
+		icon: MapPin,
+		title: "Reportar atrapados",
+		desc: "Marca en el mapa dónde hay personas atrapadas.",
+		tone: "bg-amber-500 text-white",
+	},
+	{
+		to: "/buscar",
+		icon: Search,
+		title: "Buscar a un familiar",
+		desc: "Reporta o sigue a un ser querido desaparecido.",
+		tone: "bg-sky-600 text-white",
+	},
+	{
+		to: "/ayuda",
+		icon: PhoneCall,
+		title: "¿A quién contacto?",
+		desc: "Líneas de emergencia, Cruz Roja, Protección Civil.",
+		tone: "bg-emerald-600 text-white",
+	},
+];
+
+export const Home = () => (
+	<div className="mx-auto max-w-2xl space-y-6">
+		<div className="space-y-2 text-center">
+			<div className="inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+				<LifeBuoy className="h-3.5 w-3.5" /> Respuesta a la emergencia
+			</div>
+			<h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+				Ayuda a localizar personas atrapadas
+			</h1>
+			<p className="text-muted-foreground">
+				Reporta, pide ayuda o busca a un ser querido. Tu reporte aparece en el mapa de los
+				equipos de rescate.
+			</p>
+		</div>
+
+		<div className="grid gap-3 sm:grid-cols-2">
+			{actions.map((a) => (
+				<Link key={a.to} to={a.to}>
+					<Card className="transition-shadow hover:shadow-md">
+						<CardContent className="flex items-start gap-4 p-5">
+							<div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${a.tone}`}>
+								<a.icon className="h-6 w-6" />
+							</div>
+							<div>
+								<div className="font-semibold">{a.title}</div>
+								<div className="text-sm text-muted-foreground">{a.desc}</div>
+							</div>
+						</CardContent>
+					</Card>
+				</Link>
+			))}
+		</div>
+	</div>
+);
