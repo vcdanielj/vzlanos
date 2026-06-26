@@ -398,8 +398,8 @@ export const Desaparecidos = () => {
 					<Users className="h-5 w-5 text-vzla-red" />
 					Desaparecidos — Terremoto Venezuela
 				</h1>
-				<p className="text-sm text-muted-foreground">
-					Listado de personas reportadas desaparecidas. Fuente:{" "}
+				<p className="text-sm text-muted-foreground leading-relaxed">
+					Listado de personas reportadas desaparecidas. Integrando registros de:{" "}
 					<a
 						href="https://desaparecidosterremotovenezuela.com"
 						target="_blank"
@@ -407,6 +407,42 @@ export const Desaparecidos = () => {
 						className="underline underline-offset-2 hover:text-foreground"
 					>
 						desaparecidosterremotovenezuela.com
+					</a>
+					{", "}
+					<a
+						href="https://venezuelareporta.org"
+						target="_blank"
+						rel="noreferrer"
+						className="underline underline-offset-2 hover:text-foreground"
+					>
+						venezuelareporta.org
+					</a>
+					{", "}
+					<a
+						href="https://sosvenezuela2026.com"
+						target="_blank"
+						rel="noreferrer"
+						className="underline underline-offset-2 hover:text-foreground"
+					>
+						sosvenezuela2026.com
+					</a>
+					{", "}
+					<a
+						href="https://terremotovenezuela.com"
+						target="_blank"
+						rel="noreferrer"
+						className="underline underline-offset-2 hover:text-foreground"
+					>
+						terremotovenezuela.com
+					</a>
+					{" y "}
+					<a
+						href="https://venezuelatebusca.com"
+						target="_blank"
+						rel="noreferrer"
+						className="underline underline-offset-2 hover:text-foreground"
+					>
+						venezuelatebusca.com
 					</a>
 				</p>
 			</div>
