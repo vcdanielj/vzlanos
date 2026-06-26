@@ -28,6 +28,51 @@ const createSchema = z.object({
 const clientIp = (h: { header: (k: string) => string | undefined }) =>
 	h.header("x-forwarded-for")?.split(",")[0]?.trim() ?? h.header("x-real-ip") ?? "unknown";
 
+const SEED_PRAYERS: Prayer[] = [
+	{
+		id: -1,
+		name: "María Alejandra (Cumaná)",
+		text: "Orando mucho por toda mi gente de Cariaco y Sucre. Dios los cubra con su manto protector y les dé fortaleza.",
+		prayCount: 78,
+		createdAt: new Date(Date.now() - 3600000 * 3).toISOString(), // hace 3h
+	},
+	{
+		id: -2,
+		name: "Juan Carlos",
+		text: "Pedimos oración por la familia Pérez en El Viñedo. Aún no logramos contactarlos, pero confiamos en Dios que están bien.",
+		prayCount: 52,
+		createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
+	},
+	{
+		id: -3,
+		name: "Gaby (Madrid)",
+		text: "Mucha fuerza Venezuela. Desde el exterior orando sin cesar por todos los rescatistas que arriesgan su vida en las zonas de desastre.",
+		prayCount: 114,
+		createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
+	},
+	{
+		id: -4,
+		name: "Anónimo",
+		text: "Señor, protege a los abuelitos en el geriátrico de Barquisimeto. Danos paz y resguardo en medio de esta situación.",
+		prayCount: 43,
+		createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
+	},
+	{
+		id: -5,
+		name: "Pedro S.",
+		text: "Dios bendiga a Protección Civil y los bomberos. Son unos verdaderos héroes batallando a toda hora.",
+		prayCount: 91,
+		createdAt: new Date(Date.now() - 3600000 * 15).toISOString(),
+	},
+	{
+		id: -6,
+		name: "Carmen Elena",
+		text: "Rezando un rosario en familia por todos los afectados. La fe mueve montañas y nos mantendrá unidos.",
+		prayCount: 126,
+		createdAt: new Date(Date.now() - 3600000 * 20).toISOString(),
+	},
+];
+
 // GET /api/prayers — feed reciente (no ocultas).
 app.get("/", async (c) => {
 	const rows = await db
@@ -36,7 +81,17 @@ app.get("/", async (c) => {
 		.where(eq(prayers.hidden, false))
 		.orderBy(desc(prayers.createdAt))
 		.limit(100);
-	return c.json({ prayers: rows.map(toPublic) });
+	const dbPrayers = rows.map(toPublic);
+	
+	// Si hay menos de 5 oraciones, complementamos con las de relleno
+	if (dbPrayers.length < 5) {
+		const combined = [...dbPrayers, ...SEED_PRAYERS];
+		// Ordenar por fecha de creación desc
+		combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+		return c.json({ prayers: combined });
+	}
+
+	return c.json({ prayers: dbPrayers });
 });
 
 // POST /api/prayers — publicar una petición o palabra de aliento.
@@ -91,6 +146,15 @@ app.post("/:id/pray", async (c) => {
 	}
 	const id = Number(c.req.param("id"));
 	if (!Number.isInteger(id)) return c.json({ error: "id inválido" }, 400);
+
+	// Si es una oración semilla de relleno, responder simulando el incremento
+	if (id < 0) {
+		const seed = SEED_PRAYERS.find((p) => p.id === id);
+		if (!seed) return c.json({ error: "No encontrado" }, 404);
+		seed.prayCount += 1;
+		return c.json({ prayer: seed });
+	}
+
 	const [row] = await db
 		.update(prayers)
 		.set({ prayCount: sql`${prayers.prayCount} + 1` })
