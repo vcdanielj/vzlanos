@@ -29,21 +29,21 @@ const actions = [
 		icon: Share2,
 		title: "Compartir mi ubicación",
 		desc: "Envía dónde estás a tu familia por WhatsApp para que pidan ayuda.",
-		tone: "bg-vzla-yellow text-vzla-blue",
+		tone: "bg-vzla-blue text-white",
 	},
 	{
 		to: "/buscar",
 		icon: Search,
 		title: "Buscar a un familiar",
 		desc: "Reporta o sigue a un ser querido desaparecido.",
-		tone: "bg-vzla-blue text-white",
+		tone: "bg-vzla-red text-white",
 	},
 	{
 		to: "/reunir",
 		icon: Users,
 		title: "Reúne a los tuyos",
 		desc: "Personas reportadas en vzlanos. Si reconoces a alguien, deja una pista o contacta a su familia.",
-		tone: "bg-vzla-blue text-white",
+		tone: "bg-vzla-yellow text-vzla-blue",
 	},
 	{
 		to: "/encontrar",
@@ -64,7 +64,7 @@ const actions = [
 		icon: Activity,
 		title: "Temblores recientes",
 		desc: "Consulta los sismos reportados en Venezuela en tiempo casi real.",
-		tone: "bg-vzla-red text-white",
+		tone: "bg-vzla-yellow text-vzla-blue",
 	},
 	{
 		to: "/acopio",
@@ -85,14 +85,14 @@ const actions = [
 		icon: HandHeart,
 		title: "Sala de oración",
 		desc: "Comparte tu petición y ora junto a la comunidad por Venezuela.",
-		tone: "bg-vzla-red text-white",
+		tone: "bg-vzla-yellow text-vzla-blue",
 	},
 	{
 		to: "/chat",
 		icon: MessageCircle,
 		title: "Chat en vivo",
 		desc: "Conversa y anímense en tiempo real con la comunidad venezolana.",
-		tone: "bg-vzla-yellow text-vzla-blue",
+		tone: "bg-vzla-blue text-white",
 	},
 ];
 

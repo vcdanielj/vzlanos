@@ -63,7 +63,7 @@ export const App = () => {
 							<span className="text-lg font-bold tracking-tight">vzlanos</span>
 						</Link>
 						<div className="flex items-center gap-2 md:gap-4">
-							<nav className="flex items-center gap-2 text-xs md:gap-4 md:text-sm">
+							<nav className="flex items-center gap-3 text-xs md:gap-4 md:text-sm">
 								<Link
 									to="/buscar"
 									className="text-muted-foreground transition-colors hover:text-foreground"
@@ -72,7 +72,7 @@ export const App = () => {
 								</Link>
 								<Link
 									to="/desaparecidos"
-									className="text-muted-foreground transition-colors hover:text-foreground"
+									className="hidden sm:inline text-muted-foreground transition-colors hover:text-foreground"
 								>
 									Desaparecidos
 								</Link>
@@ -90,23 +90,24 @@ export const App = () => {
 								</Link>
 								<Link
 									to="/reunir"
-									className="text-muted-foreground transition-colors hover:text-foreground"
+									className="hidden sm:inline text-muted-foreground transition-colors hover:text-foreground"
 								>
 									Reunir
 								</Link>
 								<Link
 									to="/temblores"
-									className="text-muted-foreground transition-colors hover:text-foreground"
+									className="hidden md:inline text-muted-foreground transition-colors hover:text-foreground"
 								>
 									<Activity className="hidden h-3.5 w-3.5 md:inline" /> Temblores
 								</Link>
 							</nav>
 							<Link
 								to="/reportar"
-								className="inline-flex h-9 items-center gap-1.5 rounded-full bg-destructive px-3 text-sm font-semibold text-destructive-foreground transition-opacity hover:opacity-90"
+								className="inline-flex h-9 items-center gap-1.5 rounded-full bg-destructive px-2.5 sm:px-3.5 text-sm font-semibold text-destructive-foreground transition-opacity hover:opacity-90"
 								aria-label="Reportar personas atrapadas"
 							>
-								<MapPin className="h-4 w-4" /> Reportar
+								<MapPin className="h-4 w-4" />
+								<span className="hidden sm:inline">Reportar</span>
 							</Link>
 						</div>
 					</div>
