@@ -136,15 +136,11 @@ app.get("/", async (c) => {
 		.limit(80);
 	const dbMessages = rows.map(toPublic);
 
-	// Si hay pocos mensajes, complementamos con los de relleno
-	if (dbMessages.length < 5) {
-		const combined = [...dbMessages, ...SEED_MESSAGES];
-		// Ordenar de forma ascendente (más antiguo a más nuevo) para el chat
-		combined.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-		return c.json({ messages: combined });
-	}
-
-	return c.json({ messages: dbMessages });
+	// Siempre combinamos los mensajes de la base de datos con los de semilla/relleno
+	const combined = [...dbMessages, ...SEED_MESSAGES];
+	// Ordenar de forma ascendente (más antiguo a más nuevo) para el chat
+	combined.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+	return c.json({ messages: combined });
 });
 
 // POST /api/chat — enviar un mensaje (moderado + rate-limit).

@@ -153,15 +153,11 @@ app.get("/", async (c) => {
 		.limit(100);
 	const dbPrayers = rows.map(toPublic);
 	
-	// Si hay menos de 5 oraciones, complementamos con las de relleno
-	if (dbPrayers.length < 5) {
-		const combined = [...dbPrayers, ...SEED_PRAYERS];
-		// Ordenar por fecha de creación desc
-		combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-		return c.json({ prayers: combined });
-	}
-
-	return c.json({ prayers: dbPrayers });
+	// Siempre combinamos las oraciones de la base de datos con las de semilla/relleno
+	const combined = [...dbPrayers, ...SEED_PRAYERS];
+	// Ordenar por fecha de creación desc
+	combined.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+	return c.json({ prayers: combined });
 });
 
 // POST /api/prayers — publicar una petición o palabra de aliento.
