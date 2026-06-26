@@ -64,6 +64,66 @@ const SEED_MESSAGES: ChatMessage[] = [
 		text: "Recuerden que en el centro de acopio de El Viñedo están recibiendo agua mineral y cobijas hoy mismo.",
 		createdAt: new Date(Date.now() - 3600000 * 0.8).toISOString(),
 	},
+	{
+		id: -7,
+		name: "María T.",
+		text: "Vecinos, en la Escuela Básica de Cariaco están recibiendo insumos médicos. Hacen falta gasas y alcohol.",
+		createdAt: new Date(Date.now() - 3600000 * 0.7).toISOString(),
+	},
+	{
+		id: -8,
+		name: "Protección Civil Info",
+		text: "El paso por la carretera nacional Troncal 9 está parcialmente obstruido por derrumbes cerca de Guanta. Conduzcan con cuidado.",
+		createdAt: new Date(Date.now() - 3600000 * 0.6).toISOString(),
+	},
+	{
+		id: -9,
+		name: "José Alejandro",
+		text: "Buscamos información de la familia Rondón en el sector El Clavo. Si alguien los ha visto por favor avise.",
+		createdAt: new Date(Date.now() - 3600000 * 0.5).toISOString(),
+	},
+	{
+		id: -10,
+		name: "Andrés",
+		text: "Acaban de restablecer la señal de Movistar en parte del centro de Cumaná. Movilnet sigue caída.",
+		createdAt: new Date(Date.now() - 3600000 * 0.45).toISOString(),
+	},
+	{
+		id: -11,
+		name: "Alcaldía Info",
+		text: "Hay un centro de acopio oficial en la Plaza Bolívar de Barcelona. Se necesita agua y alimentos no perecederos.",
+		createdAt: new Date(Date.now() - 3600000 * 0.4).toISOString(),
+	},
+	{
+		id: -12,
+		name: "Dr. Mendoza",
+		text: "Todos los hospitales de la zona están habilitados y recibiendo donaciones de sangre tipo O- y A+.",
+		createdAt: new Date(Date.now() - 3600000 * 0.35).toISOString(),
+	},
+	{
+		id: -13,
+		name: "Gente del Zulia",
+		text: "Mucha fuerza a todos. Desde Maracaibo enviando insumos y personal de apoyo de rescate en camino.",
+		createdAt: new Date(Date.now() - 3600000 * 0.3).toISOString(),
+	},
+	{
+		id: -14,
+		name: "Pedro Luis",
+		text: "¿Alguien sabe si la pasarela de la autopista sufrió daños estructurales?",
+		createdAt: new Date(Date.now() - 3600000 * 0.2).toISOString(),
+	},
+	{
+		id: -15,
+		name: "Vecino Cumaná",
+		text: "La pasarela frente al centro comercial tiene grietas visibles, Protección Civil recomendó no pasar por debajo.",
+		createdAt: new Date(Date.now() - 3600000 * 0.15).toISOString(),
+	},
+	{
+		id: -16,
+		name: "Bombero_V",
+		text: "Mantenemos labores de remoción de escombros. Pedimos a la ciudadanía no acercarse a zonas de colapso por riesgo de réplicas.",
+		createdAt: new Date(Date.now() - 3600000 * 0.05).toISOString(),
+	},
 ];
 
 // GET /api/chat — últimos mensajes (orden cronológico para un chat).
