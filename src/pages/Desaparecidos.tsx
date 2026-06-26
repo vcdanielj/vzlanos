@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SitiosAliados } from "@/components/SitiosAliados";
+import { getRecaptchaToken } from "@/lib/recaptcha";
 
 // ─── Tipos ───────────────────────────────────────────────────────────────────
 
@@ -53,7 +54,6 @@ interface ApiResponse {
 // bloqueo CORS de la API externa (que no envía Access-Control-Allow-Origin).
 const API = "/api";
 const PAGE_SIZE = 20;
-
 async function fetchPersonas(
 	page: number,
 	q: string,
@@ -65,7 +65,10 @@ async function fetchPersonas(
 		estado,
 	});
 	if (q.trim()) params.set("q", q.trim());
-	const res = await fetch(`${API}/personas?${params}`);
+	const token = await getRecaptchaToken("submit");
+	const res = await fetch(`${API}/personas?${params}`, {
+		headers: token ? { "x-recaptcha-token": token } : {},
+	});
 	if (!res.ok) throw new Error("No se pudo cargar el listado");
 	return res.json() as Promise<ApiResponse>;
 }
@@ -79,9 +82,13 @@ async function marcarLocalizado(
 		localizadoNota: string;
 	},
 ): Promise<void> {
+	const token = await getRecaptchaToken("submit");
 	const res = await fetch(`${API}/personas/${id}`, {
 		method: "PATCH",
-		headers: { "Content-Type": "application/json" },
+		headers: {
+			"Content-Type": "application/json",
+			...(token ? { "x-recaptcha-token": token } : {}),
+		},
 		body: JSON.stringify({ estado: "localizado", ...body }),
 	});
 	if (!res.ok) throw new Error("No se pudo actualizar el registro");
